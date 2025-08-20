@@ -272,6 +272,7 @@ uint8_t Motor_HandlePID(MotorRegisterMap_t* motor) {
     
     // Convert to PWM duty (0-100%)
     uint8_t duty = (uint8_t)output;
+    motor->Actual_Speed = duty;
     
     // Update motor outputs
     if (motor_id == 1) {

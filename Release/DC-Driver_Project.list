@@ -831,12 +831,12 @@ Disassembly of section .text:
  8000922:	b2c5      	uxtb	r5, r0
  8000924:	4629      	mov	r1, r5
  8000926:	4620      	mov	r0, r4
- 8000928:	d102      	bne.n	8000930 <Motor_HandlePID+0x78>
- 800092a:	f7ff ff2b 	bl	8000784 <Motor1_OutputPWM>
- 800092e:	e7e0      	b.n	80008f2 <Motor_HandlePID+0x3a>
- 8000930:	f7ff ff34 	bl	800079c <Motor2_OutputPWM>
- 8000934:	e7dd      	b.n	80008f2 <Motor_HandlePID+0x3a>
- 8000936:	bf00      	nop
+ 8000928:	71a5      	strb	r5, [r4, #6]
+ 800092a:	d102      	bne.n	8000932 <Motor_HandlePID+0x7a>
+ 800092c:	f7ff ff2a 	bl	8000784 <Motor1_OutputPWM>
+ 8000930:	e7df      	b.n	80008f2 <Motor_HandlePID+0x3a>
+ 8000932:	f7ff ff33 	bl	800079c <Motor2_OutputPWM>
+ 8000936:	e7dc      	b.n	80008f2 <Motor_HandlePID+0x3a>
  8000938:	20000074 	.word	0x20000074
  800093c:	2000002c 	.word	0x2000002c
  8000940:	20000048 	.word	0x20000048
