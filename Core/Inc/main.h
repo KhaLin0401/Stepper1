@@ -58,6 +58,7 @@ void Error_Handler(void);
 // External declarations for handles
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
 extern I2C_HandleTypeDef hi2c1;
 
