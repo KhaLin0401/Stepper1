@@ -111,6 +111,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
         motor->Direction = IDLE;
+        motor->Actual_Speed = 0; // Reset actual speed when disabled
     }
 }
 
@@ -124,6 +125,7 @@ void Motor_Set_Enable(MotorRegisterMap_t* motor){
 }
 void Motor_Set_Disable(MotorRegisterMap_t* motor){
     motor->Enable = 0;
+    motor->Actual_Speed = 0; // Reset actual speed when disabled
 }
 
 
@@ -133,14 +135,17 @@ void Motor1_Set_Direction(uint8_t direction){
         motor1.Direction = IDLE;
         HAL_GPIO_WritePin(GPIOA, DIR_1_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(GPIOB, DIR_2_Pin, GPIO_PIN_RESET);
+        motor1.Actual_Speed = 0; // Reset actual speed when idle
     }else if(direction == FORWARD){
         motor1.Direction = FORWARD;
         HAL_GPIO_WritePin(GPIOA, DIR_1_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(GPIOB, DIR_2_Pin, GPIO_PIN_RESET);
+        motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor1.Direction = REVERSE;
         HAL_GPIO_WritePin(GPIOA, DIR_1_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(GPIOB, DIR_2_Pin, GPIO_PIN_SET);
+        motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }
 }
 void Motor2_Set_Direction(uint8_t direction){
@@ -148,20 +153,25 @@ void Motor2_Set_Direction(uint8_t direction){
         motor2.Direction = IDLE;
         HAL_GPIO_WritePin(GPIOA, DIR_3_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(GPIOB, DIR_4_Pin, GPIO_PIN_RESET);
+        motor2.Actual_Speed = 0; // Reset actual speed when idle
     }else if(direction == FORWARD){
         motor2.Direction = FORWARD;
         HAL_GPIO_WritePin(GPIOA, DIR_3_Pin, GPIO_PIN_SET);
         HAL_GPIO_WritePin(GPIOB, DIR_4_Pin, GPIO_PIN_RESET);
+        motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor2.Direction = REVERSE;
         HAL_GPIO_WritePin(GPIOA, DIR_3_Pin, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(GPIOB, DIR_4_Pin, GPIO_PIN_SET);
+        motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }
 }
 
 void Motor_Set_Speed(MotorRegisterMap_t* motor, uint8_t speed){
     motor->Command_Speed = speed;
-
+    if(motor->Enable && motor->Direction != IDLE) {
+        motor->Actual_Speed = speed; // Update actual speed when enabled and not idle
+    }
 }
 
 
@@ -185,10 +195,13 @@ uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
         motor->Status_Word = 0x0001;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0001;
         // Xuất PWM theo tốc độ đặt
+        duty = motor->Command_Speed;
+        motor->Actual_Speed = duty; // Update actual speed in ON/OFF mode
     } else {
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
         motor->Direction = IDLE;
+        motor->Actual_Speed = 0;
         duty = 0;
     }
     
@@ -258,30 +271,32 @@ uint8_t Motor_HandlePID(MotorRegisterMap_t* motor) {
         return 0;
     }
 
-    // ✅ CRITICAL FIX: Get real feedback from sensor/encoder, NOT from PWM output
+    // Get actual speed from encoder/sensor
     //motor->Actual_Speed = getActualSpeed(motor_id);
     
     // Set motor direction based on command
-    // if (motor->Command_Speed > 0) {
-    //     if (motor_id == 1) {
-    //         Motor1_Set_Direction(motor->Direction != DIRECTION_IDLE ? motor->Direction : DIRECTION_FORWARD);
-    //     } else {
-    //         Motor2_Set_Direction(motor->Direction != DIRECTION_IDLE ? motor->Direction : DIRECTION_FORWARD);
-    //     }
-    // } else {
-    //     if (motor_id == 1) {
-    //         Motor1_Set_Direction(DIRECTION_IDLE);
-    //     } else {
-    //         Motor2_Set_Direction(DIRECTION_IDLE);
-    //     }
-    // }
+    if (motor->Command_Speed > 0) {
+        if (motor_id == 1) {
+            Motor1_Set_Direction(motor->Direction != DIRECTION_IDLE ? motor->Direction : DIRECTION_FORWARD);
+        } else {
+            Motor2_Set_Direction(motor->Direction != DIRECTION_IDLE ? motor->Direction : DIRECTION_FORWARD);
+        }
+    } else {
+        if (motor_id == 1) {
+            Motor1_Set_Direction(DIRECTION_IDLE);
+        } else {
+            Motor2_Set_Direction(DIRECTION_IDLE);
+        }
+    }
 
     // Update acceleration limit from motor settings
     pid_state->acceleration_limit = (float)motor->Max_Acc;
 
-    // Compute PID with REAL feedback (not PWM output!)
+    // Compute PID with REAL feedback
     float output = PID_Compute(motor_id, (float)motor->Command_Speed, (float)motor->Actual_Speed);
+    
     motor->Actual_Speed = output;
+
     // Convert to PWM duty (0-100%)
     uint8_t duty = (uint8_t)output;
     
@@ -305,16 +320,24 @@ void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
     // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim1);
     uint32_t ccr = duty_percent * arr / 100;
-
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
+    if(motor->Direction == FORWARD){
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
+    }else if(motor->Direction == REVERSE){
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ccr);
+    }
 }
 
 void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
     // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim3);
     uint32_t ccr = duty_percent * arr / 100;
-
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
+    if(motor->Direction == FORWARD){
+        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
+        motor->Actual_Speed = duty_percent; // Update actual speed based on PWM output
+    }else if(motor->Direction == REVERSE){
+        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, ccr);
+        motor->Actual_Speed = duty_percent; // Update actual speed based on PWM output
+    }
 }
 
 // Điều khiển chiều quay motor

@@ -4,13 +4,7 @@
 #include "main.h"
 #include "ModbusMap.h"
 
-I2C_HandleTypeDef hi2c1;
 
-TIM_HandleTypeDef htim1;
-TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
-
-UART_HandleTypeDef huart2;
 
 // Global register arrays definition
 uint16_t g_holdingRegisters[HOLDING_REG_COUNT];
