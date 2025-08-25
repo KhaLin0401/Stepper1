@@ -172,6 +172,7 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -211,6 +212,7 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -656,7 +658,7 @@ void StartIOTask(void *argument)
   for(;;)
   {
     // Heartbeat LED toggle
-    HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+    //HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
     
     // Update task counter
     g_taskCounter++;
@@ -711,8 +713,8 @@ void StartUartTask(void *argument)
 /* USER CODE END Header_StartMotorTask */
 void StartMotorTask(void *argument)
 {
-  const uint16_t M1_BASE_ADDR = 0x0010;
-  const uint16_t M2_BASE_ADDR = 0x0020;
+  const uint16_t M1_BASE_ADDR = 0x0000;
+  const uint16_t M2_BASE_ADDR = 0x0010;
   // Initialize PID controllers with default values
   PID_Init(1, DEFAULT_PID_KP, DEFAULT_PID_KI, DEFAULT_PID_KD); // Motor 1
   PID_Init(2, DEFAULT_PID_KP, DEFAULT_PID_KI, DEFAULT_PID_KD); // Motor 2

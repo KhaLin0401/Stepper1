@@ -46,6 +46,16 @@ void initializeModbusRegisters(void) {
     g_holdingRegisters[REG_RESET_ERROR_COMMAND] = 0;
     g_holdingRegisters[REG_CONFIG_BAUDRATE] = DEFAULT_CONFIG_BAUDRATE;
     g_holdingRegisters[REG_CONFIG_PARITY] = DEFAULT_CONFIG_PARITY;
+
+    g_holdingRegisters[REG_MODULE_TYPE] = DEFAULT_MODULE_TYPE;
+    g_holdingRegisters[REG_MODULE_NAME_LOW] = DEFAULT_MODULE_NAME_LOW;
+    g_holdingRegisters[REG_MODULE_NAME_HIGH] = DEFAULT_MODULE_NAME_HIGH;
+    g_holdingRegisters[REG_HARDWARE_VERSION] = DEFAULT_HARDWARE_VERSION;
+    g_holdingRegisters[REG_SERIAL_NUMBER_LOW] = DEFAULT_SERIAL_NUMBER_LOW;
+    g_holdingRegisters[REG_SERIAL_NUMBER_HIGH] = DEFAULT_SERIAL_NUMBER_HIGH;
+    g_holdingRegisters[REG_BUILD_DATE_LOW] = DEFAULT_BUILD_DATE_LOW;
+    g_holdingRegisters[REG_BUILD_DATE_HIGH] = DEFAULT_BUILD_DATE_HIGH;
+    g_holdingRegisters[REG_CHECKSUM] = DEFAULT_CHECKSUM;
     
     // Motor 1 Registers (0x0000-0x000C)
     g_holdingRegisters[REG_M1_CONTROL_MODE] = DEFAULT_CONTROL_MODE;
