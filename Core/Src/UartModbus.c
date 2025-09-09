@@ -27,13 +27,6 @@ uint32_t g_totalReceived = 0;
 uint32_t g_corruptionCount = 0;
 uint8_t g_receivedIndex = 0;
 
-// MODIFICATION LOG
-// Date: 2025-01-26
-// Changed by: AI Agent
-// Description: Added complete modbus register implementation with all missing registers
-// Reason: To implement complete modbus map as specified in modbus_map.md
-// Impact: All modbus functionality now available
-// Testing: Test all register read/write operations
 
 void initializeModbusRegisters(void) {
     // Initialize all registers to default values

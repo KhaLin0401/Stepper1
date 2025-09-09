@@ -52,7 +52,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
-
+uint8_t current_baudrate = DEFAULT_CONFIG_BAUDRATE;
 /* Definitions for IOTask */
 osThreadId_t IOTaskHandle;
 const osThreadAttr_t IOTask_attributes = {
@@ -698,6 +698,7 @@ void StartUartTask(void *argument)
     // Process Modbus frame if received
     if (frameReceived) {
       processModbusFrame();
+      
     }
     
     osDelay(100); // 100ms delay
@@ -726,7 +727,7 @@ void StartMotorTask(void *argument)
       // 1. Load dữ liệu từ Modbus registers
       MotorRegisters_Load(&motor1, M1_BASE_ADDR);
       MotorRegisters_Load(&motor2, M2_BASE_ADDR);
-
+      updateBaudrate();
       // 2. Xử lý logic điều khiển motor 1
       Motor_ProcessControl(&motor1);
 
