@@ -172,7 +172,7 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -743,7 +743,7 @@ void StartMotorTask(void *argument)
   }
 }
 /* USER CODE BEGIN Header_StartVisibleTask */
-/**
+/**   
 * @brief Function implementing the VisibleTask thread.
 * @param argument: Not used
 * @retval None

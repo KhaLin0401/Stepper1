@@ -368,3 +368,48 @@ void processModbusFrame(void) {
     rxIndex = 0;
     frameReceived = 0;
 }
+
+void updateBaudrate(void) {
+    if(current_baudrate == g_holdingRegisters[REG_CONFIG_BAUDRATE])
+        return;
+    else {
+        switch(g_holdingRegisters[REG_CONFIG_BAUDRATE]) {
+            case 1:
+                current_baudrate = 1;
+                huart2.Init.BaudRate = 9600;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+            case 2:
+                current_baudrate = 2;
+                huart2.Init.BaudRate = 19200;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+            case 3:
+                current_baudrate = 3;
+                huart2.Init.BaudRate = 38400;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+            case 4:
+                current_baudrate = 4;
+                huart2.Init.BaudRate = 57600;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+            case 5:
+                current_baudrate = 5;
+                huart2.Init.BaudRate = 115200;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+            default:
+                current_baudrate = 5;
+                huart2.Init.BaudRate = 115200;
+                HAL_UART_DeInit(&huart2);
+                HAL_UART_Init(&huart2);
+                break;
+        }
+    }
+}
