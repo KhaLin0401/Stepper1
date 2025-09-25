@@ -24,8 +24,9 @@
 #define REG_M1_DIRECTION           0x0004
 #define REG_M1_MAX_SPEED           0x0005
 #define REG_M1_MIN_SPEED           0x0006
-#define REG_M1_PID_KP              0x0007
-#define REG_M1_PID_KI              0x0008
+#define REG_M1_VMAX                0x0007
+#define REG_M1_AMAX                0x0008
+#define REG_M1_JMAX                0x0009
 #define REG_M1_PID_KD              0x0009
 #define REG_M1_MAX_ACCELERATION    0x000A
 #define REG_M1_MAX_DECELERATION    0x000B
@@ -40,7 +41,9 @@
 #define REG_M2_DIRECTION           0x0014
 #define REG_M2_MAX_SPEED           0x0015
 #define REG_M2_MIN_SPEED           0x0016
-#define REG_M2_PID_KP              0x0017
+#define REG_M2_VMAX                0x0017
+#define REG_M2_AMAX                0x0018
+#define REG_M2_JMAX                0x0019
 #define REG_M2_PID_KI              0x0018
 #define REG_M2_PID_KD              0x0019
 #define REG_M2_MAX_ACCELERATION    0x001A
@@ -87,9 +90,10 @@
 #define DEFAULT_DIRECTION          0       // Idle
 #define DEFAULT_MAX_SPEED          100
 #define DEFAULT_MIN_SPEED          0
-#define DEFAULT_PID_KP             100      // ×100
-#define DEFAULT_PID_KI             10       // ×100
-#define DEFAULT_PID_KD             5        // ×100
+#define DEFAULT_VMAX               20      // ×100
+#define DEFAULT_AMAX               5       // ×100
+#define DEFAULT_JMAX               2        // ×100
+#define DEFAULT_VMIM               2
 #define DEFAULT_MAX_ACCELERATION   5
 #define DEFAULT_MAX_DECELERATION   4
 #define DEFAULT_STATUS_WORD        0x0000

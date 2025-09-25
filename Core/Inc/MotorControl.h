@@ -45,9 +45,9 @@ typedef struct {
     uint8_t Direction;             // Base + 0x04
     uint8_t Max_Speed;             // Base + 0x05
     uint8_t Min_Speed;             // Base + 0x06
-    uint8_t PID_Kp;               // Base + 0x07
-    uint8_t PID_Ki;               // Base + 0x08
-    uint8_t PID_Kd;               // Base + 0x09
+    uint8_t Vmax;                  // Base + 0x07
+    uint8_t Amax;                  // Base + 0x08
+    uint8_t Jmax;                  // Base + 0x09
     uint8_t Max_Acc;      // Base + 0x0A
     uint8_t Max_Dec;      // Base + 0x0B
     uint8_t Status_Word;           // Base + 0x0C
@@ -55,14 +55,14 @@ typedef struct {
 } MotorRegisterMap_t;
 
 typedef struct {
-    float integral;             // Accumulated error
-    float last_error;          // Previous error
-    float output;              // Current output
-    float error;               // Current error
-    float max_integral;        // Anti-windup limit
-    float acceleration_limit;   // Rate of change limit
-    float max_output;          // Maximum output limit
-} PIDState_t;
+    float v_target;    // velocity (steps/s)
+    float a;    // acceleration (steps/s^2)
+    float j;    // jerk (steps/s^3)
+    float pos;  // position (steps)
+    float Distance;  // total steps
+    float dt;      // 1 ms
+    float v_actual; // actual velocity (steps/s)
+} MotionState_t;
 //------------------------------------------
 //  Vùng nhớ ánh xạ thanh ghi
 //------------------------------------------
@@ -78,8 +78,8 @@ extern MotorRegisterMap_t motor2;
 
 extern SystemRegisterMap_t system;
 
-extern PIDState_t pid_state1;
-extern PIDState_t pid_state2;
+extern MotionState_t m1_motion_state;
+extern MotionState_t m2_motion_state;
 
 //------------------------------------------
 //  Các hàm thao tác

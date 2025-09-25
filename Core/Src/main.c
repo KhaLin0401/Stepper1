@@ -682,26 +682,53 @@ void StartIOTask(void *argument)
 /* USER CODE END Header_StartUartTask */
 void StartUartTask(void *argument)
 {
-  /* USER CODE BEGIN StartUartTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    // Update Modbus counter
-    g_modbusCounter++;
+  // /* USER CODE BEGIN StartUartTask */
+  // /* Infinite loop */
+  // for(;;)
+  // {
+  //   // Update Modbus counter
+  //   g_modbusCounter++;
     
-    // Check for UART timeout (10 seconds)
-    if (HAL_GetTick() - g_lastUARTActivity > 10000) {
-      resetUARTCommunication();
-      g_lastUARTActivity = HAL_GetTick();
-    }
+  //   // Check for UART timeout (10 seconds)
+  //   if (HAL_GetTick() - g_lastUARTActivity > 10000) {
+  //     resetUARTCommunication();
+  //     g_lastUARTActivity = HAL_GetTick();
+  //   }
     
-    // Process Modbus frame if received
-    if (frameReceived) {
-      processModbusFrame();
+  //   // Process Modbus frame if received
+  //   if (frameReceived) {
+  //     processModbusFrame();
       
-    }
+  //   }
     
-    osDelay(100); // 100ms delay
+  //   osDelay(100); // 100ms delay
+  // }
+  for(;;) {
+    g_modbusCounter++;
+
+    // Kiểm tra timeout khung (khoảng 3.5 char time ~ vài ms)
+    if (rxIndex > 0 && (HAL_GetTick() - g_lastUARTActivity > 5)) {
+        // Giả sử kết thúc frame
+        frameReceived = 1;
+    }
+
+    // Nếu nhận được frame
+    if (frameReceived) {
+        processModbusFrame();
+
+        // Reset buffer sau khi xử lý
+        rxIndex = 0;
+        frameReceived = 0;
+        HAL_UART_Receive_IT(&huart2, &rxBuffer[rxIndex], 1);
+    }
+
+    // Kiểm tra timeout dài (ví dụ 10s) để reset toàn bộ UART
+    if (HAL_GetTick() - g_lastUARTActivity > 10000) {
+        resetUARTCommunication();
+        g_lastUARTActivity = HAL_GetTick();
+    }
+
+    osDelay(1); // giảm delay để Modbus responsive hơn
   }
   /* USER CODE END StartUartTask */
 }

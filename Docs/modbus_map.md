@@ -22,16 +22,16 @@
 
 | Address | Name                    | Type     | R/W | Description                                  | Default |    Range   |
 |---------|-------------------------|----------|-----|----------------------------------------------|---------|------------|
-| 0x0000  | M1_Control_Mode         | uint8   | R/W | 1=ONOFF, 2=PID                               | 1       |             |
+| 0x0000  | M1_Control_Mode         | uint8   | R/W | 1=ONOFF, 2=S-CURVE                           | 1       |             |
 | 0x0001  | M1_Enable               | uint8   | R/W | 0=DISABLE, 1=ENABLE                          | 0       |             |
 | 0x0002  | M1_Command_Speed        | uint8   | R/W | Speed setpoint                               | 0       |             |
 | 0x0003  | M1_Actual_Speed         | uint8   | R   | Measured speed                               | 0       |             |
 | 0x0004  | M1_Direction            | uint8   | R/W | 0=Idle, 1=Forward, 2=Reverse                 | 0       |             |
 | 0x0005  | M1_Max_Speed            | uint8   | R/W | Maximum speed limit                          | 100     |             |
 | 0x0006  | M1_Min_Speed            | uint8   | R/W | Minimum speed limit                          | 0       |             |
-| 0x0007  | M1_PID_Kp               | uint8   | R/W | PID Kp gain (×100)                           | 100     |             |
-| 0x0008  | M1_PID_Ki               | uint8   | R/W | PID Ki gain (×100)                           | 10      |             |
-| 0x0009  | M1_PID_Kd               | uint8   | R/W | PID Kd gain (×100)                           | 5       |             |
+| 0x0007  | M1_Vmax                 | uint8   | R/W | Maximum velocity (×100)                      | 100     |             |
+| 0x0008  | M1_Amax                 | uint8   | R/W | Maximum acceleration (×100)                  | 10      |             |
+| 0x0009  | M1_Jmax                 | uint8   | R/W | Maximum jerk (×100)                          | 5       |             |
 | 0x000A  | M1_Max_Acceleration     | uint8   | R/W | Maximum acceleration rate                    | 5       |             |
 | 0x000B  | M1_Max_Deceleration     | uint8   | R/W | Maximum deceleration rate                    | 4       |             |
 | 0x000C  | M1_Status_Word          | uint8   | R   | Motor status flags                           | 0x0000  |             |
@@ -43,16 +43,16 @@
 
 | Address | Name                    | Type     | R/W | Description                                  | Default |    Range   |
 |---------|-------------------------|----------|-----|----------------------------------------------|---------|------------|
-| 0x0010  | M2_Control_Mode         | uint8   | R/W | 1=ONOFF, 2=PID                               | 1       |             |
+| 0x0010  | M2_Control_Mode         | uint8   | R/W | 1=ONOFF, 2=S-CURVE                           | 1       |             |
 | 0x0011  | M2_Enable               | uint8   | R/W | 0=OFF, 1=ON                                  | 0       |             |
 | 0x0012  | M2_Command_Speed        | uint8   | R/W | Speed setpoint                               | 0       |             |
 | 0x0013  | M2_Actual_Speed         | uint8   | R   | Measured speed                               | 0       |             |
 | 0x0014  | M2_Direction            | uint8   | R/W | 0=Idle, 1=Forward, 2=Reverse                 | 0       |             |
 | 0x0015  | M2_Max_Speed            | uint8   | R/W | Maximum speed limit                          | 100     |             |
 | 0x0016  | M2_Min_Speed            | uint8   | R/W | Minimum speed limit                          | 0       |             |
-| 0x0017  | M2_PID_Kp               | uint8   | R/W | PID Kp gain (×100)                           | 100     |             |
-| 0x0018  | M2_PID_Ki               | uint8   | R/W | PID Ki gain (×100)                           | 10      |             |
-| 0x0019  | M2_PID_Kd               | uint8   | R/W | PID Kd gain (×100)                           | 5       |             |
+| 0x0017  | M2_Vmax                 | uint8   | R/W | Maximum velocity (×100)                      | 100     |             |
+| 0x0018  | M2_Amax                 | uint8   | R/W | Maximum acceleration (×100)                  | 10      |             |
+| 0x0019  | M2_Jmax                 | uint8   | R/W | Maximum jerk (×100)                          | 5       |             |
 | 0x001A  | M2_Max_Acceleration     | uint8   | R/W | Maximum acceleration rate                    | 5       |             |
 | 0x001B  | M2_Max_Deceleration     | uint8   | R/W | Maximum deceleration rate                    | 4       |             |
 | 0x001C  | M2_Status_Word          | uint8   | R   | Motor status flags                           | 0x0000  |             |
