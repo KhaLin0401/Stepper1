@@ -141,6 +141,8 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_ADC1_Init();
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   /* USER CODE BEGIN 2 */
 
   // Start PWM timers for motor control

@@ -152,7 +152,7 @@ void Motor_SetDirection(uint8_t motor_id, uint8_t direction);  // 0=Idle, 1=Forw
 
 // Khởi tạo giá trị PID cho từng motor
 void MotionState_Init(uint8_t motor_id);
-
+void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual);
 // Reset các lỗi nếu có
 void Motor_ResetError(MotorRegisterMap_t* motor);
 
