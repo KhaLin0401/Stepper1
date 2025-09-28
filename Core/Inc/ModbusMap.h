@@ -70,7 +70,7 @@
 #define TOTAL_HOLDING_REG_COUNT    0x0045  // Total number of registers
 
 // Default Values for System Registers
-#define DEFAULT_DEVICE_ID          3
+#define DEFAULT_DEVICE_ID          5
 #define DEFAULT_CONFIG_BAUDRATE    5
 #define DEFAULT_CONFIG_PARITY      0
 #define DEFAULT_CONFIG_STOP_BIT    1
@@ -93,7 +93,7 @@
 #define DEFAULT_VMAX               20      // ×100
 #define DEFAULT_AMAX               5       // ×100
 #define DEFAULT_JMAX               2        // ×100
-#define DEFAULT_VMIM               2
+#define DEFAULT_VMIN               200
 #define DEFAULT_MAX_ACCELERATION   5
 #define DEFAULT_MAX_DECELERATION   4
 #define DEFAULT_STATUS_WORD        0x0000
@@ -102,7 +102,7 @@
 
 // Control Mode Values
 #define CONTROL_MODE_ONOFF        1
-#define CONTROL_MODE_PID          2
+#define CONTROL_MODE_RAMP         2
 
 // Direction Values
 #define DIRECTION_IDLE            0

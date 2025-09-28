@@ -19,9 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "ModbusMap.h"
 #include "MotorControl.h"
 #include "UartModbus.h"
+#include "ModbusMap.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
@@ -172,7 +172,6 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -212,7 +211,6 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -375,9 +373,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 7;
+  htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 899;
+  htim1.Init.Period = 65535;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -498,9 +496,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 7;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 899;
+  htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -596,10 +594,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED4_Pin|LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED1_Pin|DIR_1_Pin|DIR_3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED1_Pin|DIR_1_Pin|EN_1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DIR_2_Pin|DIR_4_Pin|OUT2_Pin|OUT1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, DIR_2_Pin|EN_2_Pin|OUT2_Pin|OUT1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : LED4_Pin LED3_Pin LED2_Pin */
   GPIO_InitStruct.Pin = LED4_Pin|LED3_Pin|LED2_Pin;
@@ -608,8 +606,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED1_Pin DIR_1_Pin DIR_3_Pin */
-  GPIO_InitStruct.Pin = LED1_Pin|DIR_1_Pin|DIR_3_Pin;
+  /*Configure GPIO pins : LED1_Pin DIR_1_Pin EN_1_Pin */
+  GPIO_InitStruct.Pin = LED1_Pin|DIR_1_Pin|EN_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -621,8 +619,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(IN1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIR_2_Pin DIR_4_Pin OUT2_Pin OUT1_Pin */
-  GPIO_InitStruct.Pin = DIR_2_Pin|DIR_4_Pin|OUT2_Pin|OUT1_Pin;
+  /*Configure GPIO pins : DIR_2_Pin EN_2_Pin OUT2_Pin OUT1_Pin */
+  GPIO_InitStruct.Pin = DIR_2_Pin|EN_2_Pin|OUT2_Pin|OUT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -682,7 +680,7 @@ void StartIOTask(void *argument)
 /* USER CODE END Header_StartUartTask */
 void StartUartTask(void *argument)
 {
-  // /* USER CODE BEGIN StartUartTask */
+  /* USER CODE BEGIN StartUartTask */
   // /* Infinite loop */
   // for(;;)
   // {
@@ -745,6 +743,8 @@ void StartMotorTask(void *argument)
   const uint16_t M1_BASE_ADDR = 0x0000;
   const uint16_t M2_BASE_ADDR = 0x0010;
   // Initialize PID controllers with default values
+  MotionState_Init(1);
+  MotionState_Init(2);
 
 
   // Vòng lặp RTOS
@@ -768,6 +768,7 @@ void StartMotorTask(void *argument)
       osDelay(10);
   }
 }
+
 /* USER CODE BEGIN Header_StartVisibleTask */
 /**   
 * @brief Function implementing the VisibleTask thread.

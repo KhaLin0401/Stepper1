@@ -4,8 +4,8 @@
 #include "main.h"
 #include <stdint.h>
 
-#define MODBUS_SLAVE_ADDRESS    3
-#define MODBUS_BAUDRATE         9600
+#define MODBUS_SLAVE_ADDRESS    5
+#define MODBUS_BAUDRATE         115200
 #define HOLDING_REG_START       0x0000
 #define HOLDING_REG_COUNT       300  // Increased to cover all register addresses
 #define INPUT_REG_START         0x0000

@@ -1,7 +1,7 @@
-../Core/Src/main.c:654:6:StartIOTask	8	static
-../Core/Src/main.c:778:6:StartVisibleTask	8	static
-../Core/Src/main.c:683:6:StartUartTask	8	static
-../Core/Src/main.c:743:6:StartMotorTask	16	static
-../Core/Src/main.c:234:6:SystemClock_Config	88	static,ignoring_inline_asm
+../Core/Src/main.c:652:6:StartIOTask	8	static
+../Core/Src/main.c:779:6:StartVisibleTask	8	static
+../Core/Src/main.c:681:6:StartUartTask	8	static
+../Core/Src/main.c:741:6:StartMotorTask	16	static
+../Core/Src/main.c:232:6:SystemClock_Config	88	static,ignoring_inline_asm
 ../Core/Src/main.c:116:5:main	112	static,ignoring_inline_asm
-../Core/Src/main.c:793:6:Error_Handler	0	static,ignoring_inline_asm
+../Core/Src/main.c:794:6:Error_Handler	0	static,ignoring_inline_asm

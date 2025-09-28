@@ -1,6 +1,15 @@
 #ifndef __MOTOR_MODBUS_MAP_H__
 #define __MOTOR_MODBUS_MAP_H__
 
+
+#ifndef __HAL_TIM_GET_PRESCALER
+#define __HAL_TIM_GET_PRESCALER(__HANDLE__)   ((__HANDLE__)->Instance->PSC)
+#endif
+
+#ifndef __HAL_TIM_SET_PRESCALER
+#define __HAL_TIM_SET_PRESCALER(__HANDLE__, __PRESC__)  ((__HANDLE__)->Instance->PSC = (__PRESC__))
+#endif
+
 #include <stdint.h>
 #include "main.h"
 
@@ -9,7 +18,7 @@ extern "C" {
 #endif
 
 #define MODE_ONOFF 1
-#define MODE_PID 2
+#define MODE_S_CURVE 2
 
 typedef enum{
     IDLE = 0,
@@ -132,7 +141,7 @@ uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor);
 
 // Xử lý LINEAR mode (mode 2)
 // Xử lý PID mode (mode 3)
-uint8_t Motor_HandlePID(MotorRegisterMap_t* motor);
+uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor);
 
 // Gửi tín hiệu PWM dựa vào Actual_Speed
 void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent);  // motor_id = 1 hoặc 2
@@ -142,10 +151,7 @@ void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent);  // moto
 void Motor_SetDirection(uint8_t motor_id, uint8_t direction);  // 0=Idle, 1=Forward, 2=Reverse
 
 // Khởi tạo giá trị PID cho từng motor
-void PID_Init(uint8_t motor_id, float kp, float ki, float kd);
-
-// Tính toán PID mỗi chu kỳ
-float PID_Compute(uint8_t motor_id, float setpoint, float feedback);
+void MotionState_Init(uint8_t motor_id);
 
 // Reset các lỗi nếu có
 void Motor_ResetError(MotorRegisterMap_t* motor);
