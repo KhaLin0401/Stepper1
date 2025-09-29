@@ -96,7 +96,6 @@ void SystemRegisters_Save(SystemRegisterMap_t* sys, uint16_t base_addr){
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor){
     if(motor->Enable == 1){
-        HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_SET);
         switch(motor->Control_Mode){
             case CONTROL_MODE_ONOFF:
                 Motor_HandleOnOff(motor);
@@ -108,6 +107,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
                 break;
         } 
         if (motor == &motor1) {
+            HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
             Motor1_Set_Direction(motor->Direction);
         }
         else {
@@ -115,7 +115,6 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
         }
     }
     else if(motor->Enable == 0){
-        HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
         motor->Direction = IDLE;
@@ -124,14 +123,13 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
         if(motor == &motor1) {
 //            Motor1_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             Motor1_Set_Direction(IDLE);           // Set direction to IDLE
+            HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_SET);
         } else {
 //            Motor2_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             Motor2_Set_Direction(IDLE);           // Set direction to IDLE
         }
     }
 }
-
-
 
 void Motor_Set_Mode(MotorRegisterMap_t* motor, uint8_t mode){
     motor->Control_Mode = mode;
