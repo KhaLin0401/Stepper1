@@ -53,6 +53,10 @@ TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
 uint8_t current_baudrate = DEFAULT_CONFIG_BAUDRATE;
+
+uint8_t PWM_Channel_Flag_1 = 0;
+uint8_t PWM_Channel_Flag_2 = 0;
+
 /* Definitions for IOTask */
 osThreadId_t IOTaskHandle;
 const osThreadAttr_t IOTask_attributes = {
@@ -141,8 +145,10 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_ADC1_Init();
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) == HAL_OK)
+    PWM_Channel_Flag_1 = 1;
+  if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) == HAL_OK)
+    PWM_Channel_Flag_1 = 1;
   /* USER CODE BEGIN 2 */
 
   // Start PWM timers for motor control

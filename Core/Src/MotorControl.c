@@ -40,11 +40,34 @@ uint16_t mapRegisterAddress(uint16_t modbusAddress) {
 }
 // Load từ modbus registers
 void MotorRegisters_Load(MotorRegisterMap_t* motor, uint16_t base_addr) {
-    motor->Control_Mode = g_holdingRegisters[base_addr + 0x00];
-    motor->Enable = g_holdingRegisters[base_addr + 0x01];
+    if(g_holdingRegisters[base_addr + 0x00] == 1 ||
+    g_holdingRegisters[base_addr + 0x00] == 2)
+    {
+        motor->Control_Mode = g_holdingRegisters[base_addr + 0x00];
+    }
+
+    if(g_holdingRegisters[base_addr + 0x01] == 0 ||
+    g_holdingRegisters[base_addr + 0x01] == 1)
+    {
+        motor->Enable = g_holdingRegisters[base_addr + 0x01];
+    }
+
+    if(g_holdingRegisters[base_addr + 0x02] <= 0)
+    motor->Command_Speed = 0;
+    else if(g_holdingRegisters[base_addr + 0x02] >= 100)
+    motor->Command_Speed = 100;
+    else
     motor->Command_Speed = g_holdingRegisters[base_addr + 0x02];
+
     motor->Actual_Speed = g_holdingRegisters[base_addr + 0x03];
-    motor->Direction = g_holdingRegisters[base_addr + 0x04];
+
+    if(g_holdingRegisters[base_addr + 0x04] == 0 ||
+    g_holdingRegisters[base_addr + 0x04] == 1 ||
+    g_holdingRegisters[base_addr + 0x04 == 2])
+    {
+        motor->Direction = g_holdingRegisters[base_addr + 0x04];
+    }
+
     motor->Max_Speed = g_holdingRegisters[base_addr + 0x05];
     motor->Min_Speed = g_holdingRegisters[base_addr + 0x06];
     motor->Vmax = g_holdingRegisters[base_addr + 0x07];
@@ -111,6 +134,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
             Motor1_Set_Direction(motor->Direction);
         }
         else {
+            HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
             Motor2_Set_Direction(motor->Direction);
         }
     }
@@ -127,6 +151,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
         } else {
 //            Motor2_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             Motor2_Set_Direction(IDLE);           // Set direction to IDLE
+            HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_SET);
         }
     }
 }
@@ -148,21 +173,28 @@ void Motor1_Set_Direction(uint8_t direction){
     if(direction == IDLE){
         motor1.Direction = IDLE;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
-        motor1.Actual_Speed = 0; // Reset actual speed when idle
-        
+
+        motor1.Command_Speed = 0; 
         // ✅ CRITICAL FIX: STOP ALL PWM CHANNELS WHEN IDLE
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+        if(PWM_Channel_Flag_1 == 1){
+            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+            PWM_Channel_Flag_1 = 0;
+        }
     }else if(direction == FORWARD){
         motor1.Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_SET);
-        // HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
-        // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
+        if(PWM_Channel_Flag_1 == 0){
+            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+            PWM_Channel_Flag_1 = 1;
+        }
+                // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor1.Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
-        // HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_SET);
+        if(PWM_Channel_Flag_1 == 0){
+            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+            PWM_Channel_Flag_1 = 1;
+        }
         // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }
 }
@@ -170,18 +202,27 @@ void Motor2_Set_Direction(uint8_t direction){
     if(direction == IDLE){
         motor2.Direction = IDLE;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
-        motor2.Actual_Speed = 0; // Reset actual speed when idle
+        motor2.Command_Speed = 0; 
         
-        // ✅ CRITICAL FIX: STOP ALL PWM CHANNELS WHEN IDLE
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+        if(PWM_Channel_Flag_2 == 1){
+            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+            PWM_Channel_Flag_2 = 0;
+        }
     }else if(direction == FORWARD){
         motor2.Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_SET);
+        if(PWM_Channel_Flag_2 == 0){
+            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+            PWM_Channel_Flag_2 = 1;
+        }
         // motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor2.Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
+        if(PWM_Channel_Flag_2 == 0){
+            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+            PWM_Channel_Flag_2 = 1;
+        }
         // motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }
 }
@@ -203,31 +244,6 @@ void Motor_Set_Amax(MotorRegisterMap_t* motor, uint8_t amax){
 void Motor_Set_Jmax(MotorRegisterMap_t* motor, uint8_t jmax){
     motor->Jmax = jmax;
 }
-
-static uint32_t GetTimerInputClockHz(TIM_HandleTypeDef *htim)
-{
-    uint32_t pclk;
-    uint32_t tim_clk;
-
-    /* TIM1, TIM8 on APB2; others on APB1 (STM32F1 family) */
-    if (htim->Instance == TIM1) {
-        pclk = HAL_RCC_GetPCLK2Freq();
-        /* If APB2 prescaler != 1, timer clock = PCLK2 * 2 */
-        if ((RCC->CFGR & RCC_CFGR_PPRE2) != RCC_CFGR_PPRE2_DIV1) 
-            tim_clk = pclk * 2;
-        else 
-            tim_clk = pclk;
-    } else {
-        pclk = HAL_RCC_GetPCLK1Freq();
-        /* If APB1 prescaler != 1, timer clock = PCLK1 * 2 */
-        if ((RCC->CFGR & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1) 
-            tim_clk = pclk * 2;
-        else 
-            tim_clk = pclk;
-    }
-    return tim_clk;
-}
-
 
 // Xử lý ON/OFF mode (mode 1)
 uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
@@ -266,55 +282,27 @@ uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
     return 0;
 }
 
-
-// Function to simulate actual speed measurement (replace with real encoder reading)
-uint8_t getActualSpeed(uint8_t motor_id) {
-    // For now, simulate speed based on PWM duty with some delay/filtering
-    // In real implementation, this should read from encoder or current sensor
-    static uint8_t simulated_speed1 = 0;
-    static uint8_t simulated_speed2 = 0;
-    
-    if (motor_id == 1) {
-        // Simple first-order filter to simulate motor response
-        uint8_t target_speed = motor1.Command_Speed;
-        if (simulated_speed1 < target_speed) {
-            simulated_speed1 += (target_speed > simulated_speed1 + 2) ? 2 : (target_speed - simulated_speed1);
-        } else if (simulated_speed1 > target_speed) {
-            simulated_speed1 -= (simulated_speed1 > target_speed + 2) ? 2 : (simulated_speed1 - target_speed);
-        }
-        return simulated_speed1;
-    } else {
-        uint8_t target_speed = motor2.Command_Speed;
-        if (simulated_speed2 < target_speed) {
-            simulated_speed2 += (target_speed > simulated_speed2 + 2) ? 2 : (target_speed - simulated_speed2);
-        } else if (simulated_speed2 > target_speed) {
-            simulated_speed2 -= (simulated_speed2 > target_speed + 2) ? 2 : (simulated_speed2 - target_speed);
-        }
-        return simulated_speed2;
-    }
-}
-
 // Xử lý PID mode (mode 3)
 uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     uint8_t motor_id = (motor == &motor1) ? 1 : 2;
     MotionState_t *motion_state = (motor_id == 1) ? &m1_motion_state : &m2_motion_state;
 
-    /* ------------------ 1) Điều kiện dừng / disable ------------------ */
-    if (motor->Enable == 0 || motor->Control_Mode != CONTROL_MODE_RAMP || motor->Direction == IDLE) {
-        /* reset motion state (khởi tạo an toàn) */
-        MotionState_Init(motor_id);
+    // /* ------------------ 1) Điều kiện dừng / disable ------------------ */
+    // if (motor->Enable == 0 || motor->Control_Mode != CONTROL_MODE_RAMP || motor->Direction == IDLE) {
+    //     /* reset motion state (khởi tạo an toàn) */
+    //     MotionState_Init(motor_id);
 
-        /* dừng PWM output cho timer tương ứng */
-        if (motor_id == 1) {
-            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
-        } else {
-            __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-        }
+    //     /* dừng PWM output cho timer tương ứng */
+    //     if (motor_id == 1) {
+    //         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
+    //     } else {
+    //         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+    //     }
 
-        /* đảm bảo giá trị báo UI = 0 */
-        motor->Actual_Speed = 0;
-        return motor->Actual_Speed;
-    }
+    //     /* đảm bảo giá trị báo UI = 0 */
+    //     motor->Actual_Speed = 0;
+    //     return motor->Actual_Speed;
+    // }
 
     /* ------------------ 2) Tính v_target từ Command_Speed (0..100) ------------------ */
     /* Ánh xạ percent -> vận tốc (steps/s). Command_Speed là 0..100 (%). */
@@ -338,15 +326,24 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
 
     /* ------------------ 4) Cập nhật vận tốc (v_actual) ------------------ */
     motion_state->v_actual += motion_state->a * motion_state->dt;
-
     // Giới hạn trong [0, v_target]
-    if (motion_state->v_actual > motion_state->v_target)
-        motion_state->v_actual = motion_state->v_target;
+    if (motion_state->v_actual > motor->Vmax*100)
+        motion_state->v_actual = motor->Vmax*100;
     if (motion_state->v_actual < DEFAULT_VMIN)
         motion_state->v_actual = DEFAULT_VMIN;
 
-    /* ------------------ 5) Cập nhật vị trí tích lũy ------------------ */
-    motion_state->pos += motion_state->v_actual * motion_state->dt;
+   /* Soft clamp to target */
+    if ((motion_state->a < 0) && (motion_state->v_actual <= motion_state->v_target)) {
+        motion_state->v_actual = motion_state->v_target;
+        motion_state->a = 0.0f;
+        motion_state->j = 0.0f;
+    }
+
+    if ((motion_state->a > 0) && (motion_state->v_actual >= motion_state->v_target)) {
+        motion_state->v_actual = motion_state->v_target;
+        motion_state->a = 0.0f;
+        motion_state->j = 0.0f;
+    }
 
     /* ------------------ 6) Cập nhật giá trị tốc độ Actual_Speed (%) cho UI ------------------ */
     float percent_speed = 0.0f;
@@ -355,16 +352,6 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     if (percent_speed > 100.0f) percent_speed = 100.0f;
     motor->Actual_Speed = (uint8_t)(percent_speed); // rounded
 
-    /* Nếu tốc độ rất thấp (<= Vmin) thì tạm dừng PWM (không phát xung) */
-    // if (motion_state->v_actual <= DEFAULT_VMIN) {
-    //     if (motor_id == 1) {
-    //         HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-    //     } else {
-    //         HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-    //     }
-    //     return motor->Actual_Speed;
-    // }
-
     /* ------------------ 7) Tính PSC/ARR tối ưu và cập nhật timer (tần số step) ------------------ */
     float f_step = motion_state->v_actual; // step/s (Hz)
     if(motor_id == 1){
@@ -372,12 +359,13 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     }
     else
     {
-        Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, (uint16_t)f_step);
+        Stepper_OutputFreq(&htim3, TIM_CHANNEL_2, (uint16_t)f_step);
     }
     
 
     return motor->Actual_Speed;
 }
+
 // Hàm phát xung STEP với tần số = v_actual (Hz), duty = 50%
 void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual)
 {
@@ -467,6 +455,56 @@ void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
         printf("Motor1 PWM: IDLE - STOPPED\n");
     }
+}
+
+uint8_t getActualSpeed(uint8_t motor_id) {
+    // For now, simulate speed based on PWM duty with some delay/filtering
+    // In real implementation, this should read from encoder or current sensor
+    static uint8_t simulated_speed1 = 0;
+    static uint8_t simulated_speed2 = 0;
+    
+    if (motor_id == 1) {
+        // Simple first-order filter to simulate motor response
+        uint8_t target_speed = motor1.Command_Speed;
+        if (simulated_speed1 < target_speed) {
+            simulated_speed1 += (target_speed > simulated_speed1 + 2) ? 2 : (target_speed - simulated_speed1);
+        } else if (simulated_speed1 > target_speed) {
+            simulated_speed1 -= (simulated_speed1 > target_speed + 2) ? 2 : (simulated_speed1 - target_speed);
+        }
+        return simulated_speed1;
+    } else {
+        uint8_t target_speed = motor2.Command_Speed;
+        if (simulated_speed2 < target_speed) {
+            simulated_speed2 += (target_speed > simulated_speed2 + 2) ? 2 : (target_speed - simulated_speed2);
+        } else if (simulated_speed2 > target_speed) {
+            simulated_speed2 -= (simulated_speed2 > target_speed + 2) ? 2 : (simulated_speed2 - target_speed);
+        }
+        return simulated_speed2;
+    }
+}
+
+static uint32_t GetTimerInputClockHz(TIM_HandleTypeDef *htim)
+{
+    uint32_t pclk;
+    uint32_t tim_clk;
+
+    /* TIM1, TIM8 on APB2; others on APB1 (STM32F1 family) */
+    if (htim->Instance == TIM1) {
+        pclk = HAL_RCC_GetPCLK2Freq();
+        /* If APB2 prescaler != 1, timer clock = PCLK2 * 2 */
+        if ((RCC->CFGR & RCC_CFGR_PPRE2) != RCC_CFGR_PPRE2_DIV1) 
+            tim_clk = pclk * 2;
+        else 
+            tim_clk = pclk;
+    } else {
+        pclk = HAL_RCC_GetPCLK1Freq();
+        /* If APB1 prescaler != 1, timer clock = PCLK1 * 2 */
+        if ((RCC->CFGR & RCC_CFGR_PPRE1) != RCC_CFGR_PPRE1_DIV1) 
+            tim_clk = pclk * 2;
+        else 
+            tim_clk = pclk;
+    }
+    return tim_clk;
 }
 
 void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){

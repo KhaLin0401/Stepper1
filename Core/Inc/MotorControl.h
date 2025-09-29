@@ -90,6 +90,8 @@ extern SystemRegisterMap_t system;
 extern MotionState_t m1_motion_state;
 extern MotionState_t m2_motion_state;
 
+extern uint8_t PWM_Channel_Flag_1;
+extern uint8_t PWM_Channel_Flag_2;
 //------------------------------------------
 //  Các hàm thao tác
 //------------------------------------------
