@@ -119,6 +119,14 @@ void SystemRegisters_Save(SystemRegisterMap_t* sys, uint16_t base_addr){
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor){
     if(motor->Enable == 1){
+        if (motor == &motor1) {
+            HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
+            Motor1_Set_Direction(motor->Direction);
+        }
+        else {
+            HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
+            Motor2_Set_Direction(motor->Direction);
+        }
         switch(motor->Control_Mode){
             case CONTROL_MODE_ONOFF:
                 Motor_HandleOnOff(motor);
@@ -129,14 +137,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
             default:
                 break;
         } 
-        if (motor == &motor1) {
-            HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
-            Motor1_Set_Direction(motor->Direction);
-        }
-        else {
-            HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
-            Motor2_Set_Direction(motor->Direction);
-        }
+        
     }
     else if(motor->Enable == 0){
         motor->Status_Word = 0x0000;
@@ -247,39 +248,27 @@ void Motor_Set_Jmax(MotorRegisterMap_t* motor, uint8_t jmax){
 
 // Xử lý ON/OFF mode (mode 1)
 uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
-    // uint8_t duty = 0;
-    // uint8_t motor_id = (motor == &motor1) ? 1 : 2;
+    uint8_t motor_id = (motor == &motor1) ? 1 : 2;
+    uint16_t v_target, v_actual;
+    v_target = DEFAULT_VMIN + (motor->Vmax*100 - DEFAULT_VMIN) * (motor->Command_Speed / 100.0f);
+    v_actual = v_target;
+    float percent_speed = 0.0f;
+    percent_speed = (v_actual - DEFAULT_VMIN) / (motor->Vmax*100 - DEFAULT_VMIN) * 100.0f;
+    if (percent_speed < 0.0f) percent_speed = 0.0f;
+    if (percent_speed > 100.0f) percent_speed = 100.0f;
+    motor->Actual_Speed = (uint8_t)(percent_speed); // rounded
+
+    /* ------------------ 7) Tính PSC/ARR tối ưu và cập nhật timer (tần số step) ------------------ */
+    if(motor_id == 1){
+        Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, v_actual);
+    }
+    else
+    {
+        Stepper_OutputFreq(&htim3, TIM_CHANNEL_2, v_actual);
+    }
     
-    // if(motor->Enable == 1 && motor->Direction != IDLE) {
-    //     motor->Status_Word = 0x0001;
-    //     g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0001;
-    //     // Xuất PWM theo tốc độ đặt
-    //     duty = motor->Command_Speed;
-    //     motor->Actual_Speed = duty; // Update actual speed in ON/OFF mode
-        
-    //     // ✅ CRITICAL FIX: OUTPUT PWM WHEN ENABLED
-    //     if(motor_id == 1) {
-    //         Motor1_OutputPWM(motor, duty);
-    //     } else {
-    //         Motor2_OutputPWM(motor, duty);
-    //     }
-    // } else {
-    //     motor->Status_Word = 0x0000;
-    //     g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
-    //     motor->Direction = IDLE;
-    //     motor->Actual_Speed = 0;
-    //     duty = 0;
-        
-    //     // ✅ CRITICAL FIX: STOP PWM WHEN DISABLED OR IDLE
-    //     if(motor_id == 1) {
-    //         Motor1_OutputPWM(motor, 0);
-    //         Motor1_Set_Direction(IDLE);
-    //     } else {
-    //         Motor2_OutputPWM(motor, 0);
-    //         Motor2_Set_Direction(IDLE);
-    //     }
-    // }
-    return 0;
+
+    return motor->Actual_Speed;
 }
 
 // Xử lý PID mode (mode 3)
@@ -370,7 +359,7 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
 void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual)
 {
 
-    if (v_actual <= 1.0f) {
+    if (v_actual <= 400.0f) {
         __HAL_TIM_SET_COMPARE(htim, channel, 0); 
         return;
     }
@@ -415,7 +404,7 @@ void MotionState_Init(uint8_t motor_id){
     motor->j = 0.0f;
     motor->pos = 0.0f;
     motor->Distance = 0.0f;
-    motor->dt = 0.001f;
+    motor->dt = 0.008f;
     motor->v_actual = 0.0f;
 }
 
