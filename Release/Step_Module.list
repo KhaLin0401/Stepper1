@@ -1469,199 +1469,199 @@ Disassembly of section .text:
  8000fbc:	20000096 	.word	0x20000096
 
 08000fc0 <processModbusFrame>:
- 8000fc0:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
- 8000fc4:	4d7e      	ldr	r5, [pc, #504]	@ (80011c0 <processModbusFrame+0x200>)
- 8000fc6:	b0c0      	sub	sp, #256	@ 0x100
- 8000fc8:	782e      	ldrb	r6, [r5, #0]
- 8000fca:	2e05      	cmp	r6, #5
- 8000fcc:	f240 8092 	bls.w	80010f4 <processModbusFrame+0x134>
+ 8000fc0:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
+ 8000fc4:	4e7e      	ldr	r6, [pc, #504]	@ (80011c0 <processModbusFrame+0x200>)
+ 8000fc6:	b0c1      	sub	sp, #260	@ 0x104
+ 8000fc8:	7837      	ldrb	r7, [r6, #0]
+ 8000fca:	2f05      	cmp	r7, #5
+ 8000fcc:	f240 8093 	bls.w	80010f6 <processModbusFrame+0x136>
  8000fd0:	4c7c      	ldr	r4, [pc, #496]	@ (80011c4 <processModbusFrame+0x204>)
- 8000fd2:	7827      	ldrb	r7, [r4, #0]
- 8000fd4:	2f05      	cmp	r7, #5
- 8000fd6:	f040 808d 	bne.w	80010f4 <processModbusFrame+0x134>
- 8000fda:	1eb1      	subs	r1, r6, #2
+ 8000fd2:	7825      	ldrb	r5, [r4, #0]
+ 8000fd4:	2d06      	cmp	r5, #6
+ 8000fd6:	f040 808e 	bne.w	80010f6 <processModbusFrame+0x136>
+ 8000fda:	1eb9      	subs	r1, r7, #2
  8000fdc:	4620      	mov	r0, r4
  8000fde:	f7ff ff73 	bl	8000ec8 <calcCRC>
  8000fe2:	5c62      	ldrb	r2, [r4, r1]
  8000fe4:	b2c3      	uxtb	r3, r0
  8000fe6:	429a      	cmp	r2, r3
  8000fe8:	d106      	bne.n	8000ff8 <processModbusFrame+0x38>
- 8000fea:	4426      	add	r6, r4
- 8000fec:	f816 3c01 	ldrb.w	r3, [r6, #-1]
+ 8000fea:	4427      	add	r7, r4
+ 8000fec:	f817 3c01 	ldrb.w	r3, [r7, #-1]
  8000ff0:	f3c0 200f 	ubfx	r0, r0, #8, #16
  8000ff4:	4283      	cmp	r3, r0
  8000ff6:	d007      	beq.n	8001008 <processModbusFrame+0x48>
  8000ff8:	f44f 5100 	mov.w	r1, #8192	@ 0x2000
  8000ffc:	4872      	ldr	r0, [pc, #456]	@ (80011c8 <processModbusFrame+0x208>)
- 8000ffe:	b040      	add	sp, #256	@ 0x100
- 8001000:	e8bd 41f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, lr}
+ 8000ffe:	b041      	add	sp, #260	@ 0x104
+ 8001000:	e8bd 43f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, lr}
  8001004:	f001 bb01 	b.w	800260a <HAL_GPIO_TogglePin>
  8001008:	7863      	ldrb	r3, [r4, #1]
- 800100a:	f88d 7000 	strb.w	r7, [sp]
+ 800100a:	f88d 5000 	strb.w	r5, [sp]
  800100e:	2b06      	cmp	r3, #6
  8001010:	f88d 3001 	strb.w	r3, [sp, #1]
- 8001014:	f000 80a5 	beq.w	8001162 <processModbusFrame+0x1a2>
+ 8001014:	f000 80a6 	beq.w	8001164 <processModbusFrame+0x1a4>
  8001018:	d807      	bhi.n	800102a <processModbusFrame+0x6a>
  800101a:	2b03      	cmp	r3, #3
  800101c:	d030      	beq.n	8001080 <processModbusFrame+0xc0>
  800101e:	2b04      	cmp	r3, #4
- 8001020:	d075      	beq.n	800110e <processModbusFrame+0x14e>
+ 8001020:	d076      	beq.n	8001110 <processModbusFrame+0x150>
  8001022:	2201      	movs	r2, #1
  8001024:	f043 0380 	orr.w	r3, r3, #128	@ 0x80
- 8001028:	e08f      	b.n	800114a <processModbusFrame+0x18a>
+ 8001028:	e090      	b.n	800114c <processModbusFrame+0x18c>
  800102a:	2b10      	cmp	r3, #16
  800102c:	d1f9      	bne.n	8001022 <processModbusFrame+0x62>
- 800102e:	8862      	ldrh	r2, [r4, #2]
- 8001030:	88a3      	ldrh	r3, [r4, #4]
- 8001032:	ba52      	rev16	r2, r2
+ 800102e:	8863      	ldrh	r3, [r4, #2]
+ 8001030:	f894 8002 	ldrb.w	r8, [r4, #2]
  8001034:	ba5b      	rev16	r3, r3
- 8001036:	b292      	uxth	r2, r2
- 8001038:	b29b      	uxth	r3, r3
- 800103a:	eb02 0e03 	add.w	lr, r2, r3
- 800103e:	f5be 7f96 	cmp.w	lr, #300	@ 0x12c
- 8001042:	f894 c002 	ldrb.w	ip, [r4, #2]
- 8001046:	78e7      	ldrb	r7, [r4, #3]
- 8001048:	7926      	ldrb	r6, [r4, #4]
- 800104a:	7960      	ldrb	r0, [r4, #5]
- 800104c:	79a1      	ldrb	r1, [r4, #6]
- 800104e:	f300 8086 	bgt.w	800115e <processModbusFrame+0x19e>
- 8001052:	ebb1 0f43 	cmp.w	r1, r3, lsl #1
- 8001056:	f040 8082 	bne.w	800115e <processModbusFrame+0x19e>
- 800105a:	495c      	ldr	r1, [pc, #368]	@ (80011cc <processModbusFrame+0x20c>)
- 800105c:	eb01 0242 	add.w	r2, r1, r2, lsl #1
- 8001060:	2100      	movs	r1, #0
- 8001062:	428b      	cmp	r3, r1
- 8001064:	f104 0402 	add.w	r4, r4, #2
- 8001068:	f340 8099 	ble.w	800119e <processModbusFrame+0x1de>
- 800106c:	f894 8005 	ldrb.w	r8, [r4, #5]
- 8001070:	f894 e006 	ldrb.w	lr, [r4, #6]
+ 8001036:	b299      	uxth	r1, r3
+ 8001038:	88a3      	ldrh	r3, [r4, #4]
+ 800103a:	f894 e003 	ldrb.w	lr, [r4, #3]
+ 800103e:	ba5b      	rev16	r3, r3
+ 8001040:	b29b      	uxth	r3, r3
+ 8001042:	18c8      	adds	r0, r1, r3
+ 8001044:	f5b0 7f96 	cmp.w	r0, #300	@ 0x12c
+ 8001048:	f894 c004 	ldrb.w	ip, [r4, #4]
+ 800104c:	7967      	ldrb	r7, [r4, #5]
+ 800104e:	79a2      	ldrb	r2, [r4, #6]
+ 8001050:	f300 8086 	bgt.w	8001160 <processModbusFrame+0x1a0>
+ 8001054:	ebb2 0f43 	cmp.w	r2, r3, lsl #1
+ 8001058:	f040 8082 	bne.w	8001160 <processModbusFrame+0x1a0>
+ 800105c:	4a5b      	ldr	r2, [pc, #364]	@ (80011cc <processModbusFrame+0x20c>)
+ 800105e:	eb02 0241 	add.w	r2, r2, r1, lsl #1
+ 8001062:	2100      	movs	r1, #0
+ 8001064:	428b      	cmp	r3, r1
+ 8001066:	f104 0402 	add.w	r4, r4, #2
+ 800106a:	f340 8099 	ble.w	80011a0 <processModbusFrame+0x1e0>
+ 800106e:	f894 9005 	ldrb.w	r9, [r4, #5]
+ 8001072:	79a0      	ldrb	r0, [r4, #6]
  8001074:	3101      	adds	r1, #1
- 8001076:	ea4e 2e08 	orr.w	lr, lr, r8, lsl #8
- 800107a:	f822 eb02 	strh.w	lr, [r2], #2
- 800107e:	e7f0      	b.n	8001062 <processModbusFrame+0xa2>
- 8001080:	8860      	ldrh	r0, [r4, #2]
+ 8001076:	ea40 2009 	orr.w	r0, r0, r9, lsl #8
+ 800107a:	f822 0b02 	strh.w	r0, [r2], #2
+ 800107e:	e7f1      	b.n	8001064 <processModbusFrame+0xa4>
+ 8001080:	8861      	ldrh	r1, [r4, #2]
  8001082:	88a2      	ldrh	r2, [r4, #4]
- 8001084:	ba40      	rev16	r0, r0
+ 8001084:	ba49      	rev16	r1, r1
  8001086:	ba52      	rev16	r2, r2
- 8001088:	b280      	uxth	r0, r0
+ 8001088:	b289      	uxth	r1, r1
  800108a:	b292      	uxth	r2, r2
- 800108c:	1881      	adds	r1, r0, r2
- 800108e:	f5b1 7f96 	cmp.w	r1, #300	@ 0x12c
- 8001092:	dc58      	bgt.n	8001146 <processModbusFrame+0x186>
- 8001094:	4c4d      	ldr	r4, [pc, #308]	@ (80011cc <processModbusFrame+0x20c>)
- 8001096:	0051      	lsls	r1, r2, #1
- 8001098:	eb04 0040 	add.w	r0, r4, r0, lsl #1
- 800109c:	2400      	movs	r4, #0
- 800109e:	f88d 1002 	strb.w	r1, [sp, #2]
+ 800108c:	1888      	adds	r0, r1, r2
+ 800108e:	f5b0 7f96 	cmp.w	r0, #300	@ 0x12c
+ 8001092:	dc59      	bgt.n	8001148 <processModbusFrame+0x188>
+ 8001094:	484d      	ldr	r0, [pc, #308]	@ (80011cc <processModbusFrame+0x20c>)
+ 8001096:	0055      	lsls	r5, r2, #1
+ 8001098:	eb00 0141 	add.w	r1, r0, r1, lsl #1
+ 800109c:	2000      	movs	r0, #0
+ 800109e:	f88d 5002 	strb.w	r5, [sp, #2]
  80010a2:	1c5f      	adds	r7, r3, #1
- 80010a4:	461e      	mov	r6, r3
- 80010a6:	42a2      	cmp	r2, r4
+ 80010a4:	461c      	mov	r4, r3
+ 80010a6:	4282      	cmp	r2, r0
  80010a8:	f103 0302 	add.w	r3, r3, #2
  80010ac:	b2ff      	uxtb	r7, r7
  80010ae:	b2db      	uxtb	r3, r3
- 80010b0:	dc23      	bgt.n	80010fa <processModbusFrame+0x13a>
- 80010b2:	3103      	adds	r1, #3
- 80010b4:	b2c9      	uxtb	r1, r1
- 80010b6:	4668      	mov	r0, sp
- 80010b8:	f7ff ff06 	bl	8000ec8 <calcCRC>
- 80010bc:	1c4b      	adds	r3, r1, #1
- 80010be:	f80d 0001 	strb.w	r0, [sp, r1]
- 80010c2:	b2db      	uxtb	r3, r3
- 80010c4:	0a00      	lsrs	r0, r0, #8
- 80010c6:	1c8a      	adds	r2, r1, #2
- 80010c8:	f80d 0003 	strb.w	r0, [sp, r3]
- 80010cc:	4669      	mov	r1, sp
- 80010ce:	2364      	movs	r3, #100	@ 0x64
- 80010d0:	483f      	ldr	r0, [pc, #252]	@ (80011d0 <processModbusFrame+0x210>)
- 80010d2:	b2d2      	uxtb	r2, r2
- 80010d4:	f003 f995 	bl	8004402 <HAL_UART_Transmit>
- 80010d8:	2800      	cmp	r0, #0
- 80010da:	d06a      	beq.n	80011b2 <processModbusFrame+0x1f2>
- 80010dc:	483a      	ldr	r0, [pc, #232]	@ (80011c8 <processModbusFrame+0x208>)
- 80010de:	f44f 5100 	mov.w	r1, #8192	@ 0x2000
- 80010e2:	f001 fa92 	bl	800260a <HAL_GPIO_TogglePin>
- 80010e6:	483a      	ldr	r0, [pc, #232]	@ (80011d0 <processModbusFrame+0x210>)
- 80010e8:	f003 f9d9 	bl	800449e <HAL_UART_Abort>
- 80010ec:	2300      	movs	r3, #0
- 80010ee:	4a39      	ldr	r2, [pc, #228]	@ (80011d4 <processModbusFrame+0x214>)
- 80010f0:	702b      	strb	r3, [r5, #0]
- 80010f2:	7013      	strb	r3, [r2, #0]
- 80010f4:	b040      	add	sp, #256	@ 0x100
- 80010f6:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
- 80010fa:	f830 cb02 	ldrh.w	ip, [r0], #2
- 80010fe:	3401      	adds	r4, #1
- 8001100:	ea4f 2e1c 	mov.w	lr, ip, lsr #8
- 8001104:	f80d e006 	strb.w	lr, [sp, r6]
- 8001108:	f80d c007 	strb.w	ip, [sp, r7]
- 800110c:	e7c9      	b.n	80010a2 <processModbusFrame+0xe2>
- 800110e:	8862      	ldrh	r2, [r4, #2]
- 8001110:	88a3      	ldrh	r3, [r4, #4]
- 8001112:	ba52      	rev16	r2, r2
- 8001114:	ba5b      	rev16	r3, r3
- 8001116:	b292      	uxth	r2, r2
- 8001118:	b29b      	uxth	r3, r3
- 800111a:	18d1      	adds	r1, r2, r3
- 800111c:	2905      	cmp	r1, #5
- 800111e:	dc1a      	bgt.n	8001156 <processModbusFrame+0x196>
- 8001120:	482d      	ldr	r0, [pc, #180]	@ (80011d8 <processModbusFrame+0x218>)
- 8001122:	2400      	movs	r4, #0
- 8001124:	eb00 0042 	add.w	r0, r0, r2, lsl #1
- 8001128:	466a      	mov	r2, sp
- 800112a:	0059      	lsls	r1, r3, #1
- 800112c:	f88d 1002 	strb.w	r1, [sp, #2]
- 8001130:	42a3      	cmp	r3, r4
- 8001132:	f102 0202 	add.w	r2, r2, #2
- 8001136:	ddbc      	ble.n	80010b2 <processModbusFrame+0xf2>
- 8001138:	f830 6b02 	ldrh.w	r6, [r0], #2
- 800113c:	3401      	adds	r4, #1
- 800113e:	0a37      	lsrs	r7, r6, #8
- 8001140:	7057      	strb	r7, [r2, #1]
- 8001142:	7096      	strb	r6, [r2, #2]
- 8001144:	e7f4      	b.n	8001130 <processModbusFrame+0x170>
- 8001146:	2383      	movs	r3, #131	@ 0x83
- 8001148:	2202      	movs	r2, #2
- 800114a:	2103      	movs	r1, #3
- 800114c:	f88d 3001 	strb.w	r3, [sp, #1]
- 8001150:	f88d 2002 	strb.w	r2, [sp, #2]
- 8001154:	e7af      	b.n	80010b6 <processModbusFrame+0xf6>
- 8001156:	2384      	movs	r3, #132	@ 0x84
- 8001158:	e7f6      	b.n	8001148 <processModbusFrame+0x188>
- 800115a:	2386      	movs	r3, #134	@ 0x86
- 800115c:	e7f4      	b.n	8001148 <processModbusFrame+0x188>
- 800115e:	2390      	movs	r3, #144	@ 0x90
- 8001160:	e7f2      	b.n	8001148 <processModbusFrame+0x188>
- 8001162:	f8b4 e002 	ldrh.w	lr, [r4, #2]
- 8001166:	f894 c002 	ldrb.w	ip, [r4, #2]
- 800116a:	fa9e f29e 	rev16.w	r2, lr
- 800116e:	b292      	uxth	r2, r2
- 8001170:	f5b2 7f96 	cmp.w	r2, #300	@ 0x12c
- 8001174:	78e7      	ldrb	r7, [r4, #3]
+ 80010b0:	dc24      	bgt.n	80010fc <processModbusFrame+0x13c>
+ 80010b2:	3503      	adds	r5, #3
+ 80010b4:	b2ed      	uxtb	r5, r5
+ 80010b6:	4629      	mov	r1, r5
+ 80010b8:	4668      	mov	r0, sp
+ 80010ba:	f7ff ff05 	bl	8000ec8 <calcCRC>
+ 80010be:	1c6b      	adds	r3, r5, #1
+ 80010c0:	f80d 0005 	strb.w	r0, [sp, r5]
+ 80010c4:	b2db      	uxtb	r3, r3
+ 80010c6:	0a00      	lsrs	r0, r0, #8
+ 80010c8:	1caa      	adds	r2, r5, #2
+ 80010ca:	f80d 0003 	strb.w	r0, [sp, r3]
+ 80010ce:	4669      	mov	r1, sp
+ 80010d0:	2364      	movs	r3, #100	@ 0x64
+ 80010d2:	483f      	ldr	r0, [pc, #252]	@ (80011d0 <processModbusFrame+0x210>)
+ 80010d4:	b2d2      	uxtb	r2, r2
+ 80010d6:	f003 f994 	bl	8004402 <HAL_UART_Transmit>
+ 80010da:	2800      	cmp	r0, #0
+ 80010dc:	d069      	beq.n	80011b2 <processModbusFrame+0x1f2>
+ 80010de:	483a      	ldr	r0, [pc, #232]	@ (80011c8 <processModbusFrame+0x208>)
+ 80010e0:	f44f 5100 	mov.w	r1, #8192	@ 0x2000
+ 80010e4:	f001 fa91 	bl	800260a <HAL_GPIO_TogglePin>
+ 80010e8:	4839      	ldr	r0, [pc, #228]	@ (80011d0 <processModbusFrame+0x210>)
+ 80010ea:	f003 f9d8 	bl	800449e <HAL_UART_Abort>
+ 80010ee:	2300      	movs	r3, #0
+ 80010f0:	4a38      	ldr	r2, [pc, #224]	@ (80011d4 <processModbusFrame+0x214>)
+ 80010f2:	7033      	strb	r3, [r6, #0]
+ 80010f4:	7013      	strb	r3, [r2, #0]
+ 80010f6:	b041      	add	sp, #260	@ 0x104
+ 80010f8:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
+ 80010fc:	f831 cb02 	ldrh.w	ip, [r1], #2
+ 8001100:	3001      	adds	r0, #1
+ 8001102:	ea4f 2e1c 	mov.w	lr, ip, lsr #8
+ 8001106:	f80d e004 	strb.w	lr, [sp, r4]
+ 800110a:	f80d c007 	strb.w	ip, [sp, r7]
+ 800110e:	e7c8      	b.n	80010a2 <processModbusFrame+0xe2>
+ 8001110:	8862      	ldrh	r2, [r4, #2]
+ 8001112:	88a3      	ldrh	r3, [r4, #4]
+ 8001114:	ba52      	rev16	r2, r2
+ 8001116:	ba5b      	rev16	r3, r3
+ 8001118:	b292      	uxth	r2, r2
+ 800111a:	b29b      	uxth	r3, r3
+ 800111c:	18d1      	adds	r1, r2, r3
+ 800111e:	2905      	cmp	r1, #5
+ 8001120:	dc1a      	bgt.n	8001158 <processModbusFrame+0x198>
+ 8001122:	492d      	ldr	r1, [pc, #180]	@ (80011d8 <processModbusFrame+0x218>)
+ 8001124:	2000      	movs	r0, #0
+ 8001126:	eb01 0142 	add.w	r1, r1, r2, lsl #1
+ 800112a:	466a      	mov	r2, sp
+ 800112c:	005d      	lsls	r5, r3, #1
+ 800112e:	f88d 5002 	strb.w	r5, [sp, #2]
+ 8001132:	4283      	cmp	r3, r0
+ 8001134:	f102 0202 	add.w	r2, r2, #2
+ 8001138:	ddbb      	ble.n	80010b2 <processModbusFrame+0xf2>
+ 800113a:	f831 4b02 	ldrh.w	r4, [r1], #2
+ 800113e:	3001      	adds	r0, #1
+ 8001140:	0a27      	lsrs	r7, r4, #8
+ 8001142:	7057      	strb	r7, [r2, #1]
+ 8001144:	7094      	strb	r4, [r2, #2]
+ 8001146:	e7f4      	b.n	8001132 <processModbusFrame+0x172>
+ 8001148:	2383      	movs	r3, #131	@ 0x83
+ 800114a:	2202      	movs	r2, #2
+ 800114c:	2503      	movs	r5, #3
+ 800114e:	f88d 3001 	strb.w	r3, [sp, #1]
+ 8001152:	f88d 2002 	strb.w	r2, [sp, #2]
+ 8001156:	e7ae      	b.n	80010b6 <processModbusFrame+0xf6>
+ 8001158:	2384      	movs	r3, #132	@ 0x84
+ 800115a:	e7f6      	b.n	800114a <processModbusFrame+0x18a>
+ 800115c:	2386      	movs	r3, #134	@ 0x86
+ 800115e:	e7f4      	b.n	800114a <processModbusFrame+0x18a>
+ 8001160:	2390      	movs	r3, #144	@ 0x90
+ 8001162:	e7f2      	b.n	800114a <processModbusFrame+0x18a>
+ 8001164:	8860      	ldrh	r0, [r4, #2]
+ 8001166:	f894 8002 	ldrb.w	r8, [r4, #2]
+ 800116a:	ba42      	rev16	r2, r0
+ 800116c:	b292      	uxth	r2, r2
+ 800116e:	f5b2 7f96 	cmp.w	r2, #300	@ 0x12c
+ 8001172:	f894 e003 	ldrb.w	lr, [r4, #3]
  8001176:	88a1      	ldrh	r1, [r4, #4]
- 8001178:	7926      	ldrb	r6, [r4, #4]
- 800117a:	7960      	ldrb	r0, [r4, #5]
- 800117c:	d2ed      	bcs.n	800115a <processModbusFrame+0x19a>
- 800117e:	4b13      	ldr	r3, [pc, #76]	@ (80011cc <processModbusFrame+0x20c>)
- 8001180:	ba4c      	rev16	r4, r1
- 8001182:	f823 4012 	strh.w	r4, [r3, r2, lsl #1]
- 8001186:	f640 1201 	movw	r2, #2305	@ 0x901
- 800118a:	4596      	cmp	lr, r2
- 800118c:	d107      	bne.n	800119e <processModbusFrame+0x1de>
- 800118e:	f5b1 7f80 	cmp.w	r1, #256	@ 0x100
- 8001192:	d104      	bne.n	800119e <processModbusFrame+0x1de>
- 8001194:	2200      	movs	r2, #0
- 8001196:	835a      	strh	r2, [r3, #26]
- 8001198:	875a      	strh	r2, [r3, #58]	@ 0x3a
- 800119a:	f8a3 2210 	strh.w	r2, [r3, #528]	@ 0x210
- 800119e:	2106      	movs	r1, #6
- 80011a0:	f88d c002 	strb.w	ip, [sp, #2]
- 80011a4:	f88d 7003 	strb.w	r7, [sp, #3]
- 80011a8:	f88d 6004 	strb.w	r6, [sp, #4]
- 80011ac:	f88d 0005 	strb.w	r0, [sp, #5]
+ 8001178:	f894 c004 	ldrb.w	ip, [r4, #4]
+ 800117c:	7967      	ldrb	r7, [r4, #5]
+ 800117e:	d2ed      	bcs.n	800115c <processModbusFrame+0x19c>
+ 8001180:	4b12      	ldr	r3, [pc, #72]	@ (80011cc <processModbusFrame+0x20c>)
+ 8001182:	ba4c      	rev16	r4, r1
+ 8001184:	f823 4012 	strh.w	r4, [r3, r2, lsl #1]
+ 8001188:	f640 1201 	movw	r2, #2305	@ 0x901
+ 800118c:	4290      	cmp	r0, r2
+ 800118e:	d107      	bne.n	80011a0 <processModbusFrame+0x1e0>
+ 8001190:	f5b1 7f80 	cmp.w	r1, #256	@ 0x100
+ 8001194:	d104      	bne.n	80011a0 <processModbusFrame+0x1e0>
+ 8001196:	2200      	movs	r2, #0
+ 8001198:	835a      	strh	r2, [r3, #26]
+ 800119a:	875a      	strh	r2, [r3, #58]	@ 0x3a
+ 800119c:	f8a3 2210 	strh.w	r2, [r3, #528]	@ 0x210
+ 80011a0:	f88d 8002 	strb.w	r8, [sp, #2]
+ 80011a4:	f88d e003 	strb.w	lr, [sp, #3]
+ 80011a8:	f88d c004 	strb.w	ip, [sp, #4]
+ 80011ac:	f88d 7005 	strb.w	r7, [sp, #5]
  80011b0:	e781      	b.n	80010b6 <processModbusFrame+0xf6>
  80011b2:	f44f 4100 	mov.w	r1, #32768	@ 0x8000
  80011b6:	4804      	ldr	r0, [pc, #16]	@ (80011c8 <processModbusFrame+0x208>)
  80011b8:	f001 fa27 	bl	800260a <HAL_GPIO_TogglePin>
- 80011bc:	e796      	b.n	80010ec <processModbusFrame+0x12c>
+ 80011bc:	e797      	b.n	80010ee <processModbusFrame+0x12e>
  80011be:	bf00      	nop
  80011c0:	20000095 	.word	0x20000095
  80011c4:	20000096 	.word	0x20000096
