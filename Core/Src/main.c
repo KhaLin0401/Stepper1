@@ -660,6 +660,7 @@ static void MX_GPIO_Init(void)
 void StartIOTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  uint32_t previousTick = osKernelGetTickCount();
   /* Infinite loop */
   for(;;)
   {
@@ -674,7 +675,7 @@ void StartIOTask(void *argument)
     g_inputRegisters[1] = HAL_GetTick() & 0xFFFF;
     Read_ACS712();
     
-    osDelay(1000); // 1 second delay
+    osDelayUntil(previousTick += 1000); // 1 second delay
   }
   /* USER CODE END 5 */
 }
@@ -689,54 +690,40 @@ void StartIOTask(void *argument)
 void StartUartTask(void *argument)
 {
   /* USER CODE BEGIN StartUartTask */
-  // /* Infinite loop */
-  // for(;;)
-  // {
-  //   // Update Modbus counter
-  //   g_modbusCounter++;
-    
-  //   // Check for UART timeout (10 seconds)
-  //   if (HAL_GetTick() - g_lastUARTActivity > 10000) {
-  //     resetUARTCommunication();
-  //     g_lastUARTActivity = HAL_GetTick();
-  //   }
-    
-  //   // Process Modbus frame if received
-  //   if (frameReceived) {
-  //     processModbusFrame();
-      
-  //   }
-    
-  //   osDelay(100); // 100ms delay
-  // }
+  
+  // Bật UART IT TRƯỚC KHI tính toán
+  startModbusUARTReception();
+  
+  // Tính toán thời gian timeout dựa trên baudrate
+  uint32_t charTime = (11 * 1000) / huart2.Init.BaudRate; // 11 bit per char (8N1 + start/stop)
+  uint32_t frameTimeout = charTime * 4; // 3.5 char time for Modbus RTU
+  if (frameTimeout < 5) frameTimeout = 5; // Tối thiểu 5ms
+  uint32_t previousTick = osKernelGetTickCount();
+  /* Infinite loop */
   for(;;) {
+
     g_modbusCounter++;
 
-    // Kiểm tra timeout khung (khoảng 3.5 char time ~ vài ms)
-    if (rxIndex > 0 && (HAL_GetTick() - g_lastUARTActivity > 5)) {
-        // Giả sử kết thúc frame
-        frameReceived = 1;
-    }
-
-    // Nếu nhận được frame
+    // Xử lý frame đã nhận đủ
     if (frameReceived) {
         processModbusFrame();
-
-        // Reset buffer sau khi xử lý
+    }
+    
+    // Kiểm tra timeout cho frame chưa hoàn chỉnh
+    // Nếu có dữ liệu trong buffer nhưng chưa đủ frame và đã timeout
+    if (!frameReceived && rxIndex > 0 && (HAL_GetTick() - g_lastUARTActivity > frameTimeout)) {
+        // Frame không hoàn chỉnh và đã timeout - bỏ qua và reset
         rxIndex = 0;
         frameReceived = 0;
-        HAL_UART_Receive_IT(&huart2, &rxBuffer[rxIndex], 1);
+        g_corruptionCount++;
     }
 
-    // Kiểm tra timeout dài (ví dụ 10s) để reset toàn bộ UART
-    if (HAL_GetTick() - g_lastUARTActivity > 10000) {
-        resetUARTCommunication();
-        g_lastUARTActivity = HAL_GetTick();
-    }
+    // Kiểm tra sức khỏe UART định kỳ
+    checkUARTHealth();
 
-    osDelay(1); // giảm delay để Modbus responsive hơn
+    // Delay 1ms
+    osDelayUntil(previousTick += 20);
   }
-  /* USER CODE END StartUartTask */
 }
 
 /* USER CODE BEGIN Header_StartMotorTask */
@@ -751,6 +738,7 @@ void StartMotorTask(void *argument)
   const uint16_t M1_BASE_ADDR = 0x0000;
   const uint16_t M2_BASE_ADDR = 0x0010;
   // Initialize PID controllers with default values
+  uint32_t previousTick = osKernelGetTickCount();
   MotionState_Init(1);
   MotionState_Init(2);
 
@@ -773,7 +761,7 @@ void StartMotorTask(void *argument)
       MotorRegisters_Save(&motor2, M2_BASE_ADDR);
 
       // 5. Delay theo chu kỳ task (ví dụ 10ms)
-      osDelay(10);
+      osDelayUntil(previousTick += 20);
   }
 }
 
@@ -786,13 +774,19 @@ void StartMotorTask(void *argument)
 /* USER CODE END Header_StartVisibleTask */
 void StartVisibleTask(void *argument)
 {
-  /* USER CODE BEGIN StartVisibleTask */
-  /* Infinite loop */
+  uint32_t previousTick = osKernelGetTickCount();
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+
+    if(g_ledIndicator == 1)
+    {
+      HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+      g_ledIndicator = 0;
+    }
+
+    osDelayUntil(previousTick += 250); // giữ chu kỳ chính xác 250ms
   }
-  /* USER CODE END StartVisibleTask */
 }
 
 /**
