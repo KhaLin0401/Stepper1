@@ -6,7 +6,7 @@
 ../Core/Src/UartModbus.c:229:10:HAL_UART_RxCpltCallback	8	static
 ../Core/Src/UartModbus.c:276:10:HAL_UART_ErrorCallback	8	static
 ../Core/Src/UartModbus.c:285:10:resetUARTCommunication	8	static
-../Core/Src/UartModbus.c:292:10:processModbusFrame	288	static
+../Core/Src/UartModbus.c:292:10:processModbusFrame	280	static
 ../Core/Src/UartModbus.c:411:10:updateBaudrate	16	static
 ../Core/Src/UartModbus.c:455:10:checkUARTHealth	16	static
 ../Core/Src/UartModbus.c:470:10:startModbusUARTReception	8	static
