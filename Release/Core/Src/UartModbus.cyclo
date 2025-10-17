@@ -4,9 +4,9 @@
 ../Core/Src/UartModbus.c:179:10:updateDigitalIOStatus	4
 ../Core/Src/UartModbus.c:213:14:calcCRC	3
 ../Core/Src/UartModbus.c:229:10:HAL_UART_RxCpltCallback	11
-../Core/Src/UartModbus.c:276:10:HAL_UART_ErrorCallback	2
-../Core/Src/UartModbus.c:285:10:resetUARTCommunication	1
-../Core/Src/UartModbus.c:292:10:processModbusFrame	22
-../Core/Src/UartModbus.c:411:10:updateBaudrate	8
-../Core/Src/UartModbus.c:455:10:checkUARTHealth	3
-../Core/Src/UartModbus.c:470:10:startModbusUARTReception	1
+../Core/Src/UartModbus.c:278:10:HAL_UART_ErrorCallback	2
+../Core/Src/UartModbus.c:287:10:resetUARTCommunication	1
+../Core/Src/UartModbus.c:294:10:processModbusFrame	22
+../Core/Src/UartModbus.c:410:10:updateBaudrate	8
+../Core/Src/UartModbus.c:454:10:checkUARTHealth	3
+../Core/Src/UartModbus.c:469:10:startModbusUARTReception	1

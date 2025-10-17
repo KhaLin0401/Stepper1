@@ -260,6 +260,8 @@ static uint8_t uart_error_count = 0;
                     // Nếu đã nhận đủ frame theo expectedLength
                     if (expectedLength > 0 && rxIndex >= expectedLength) {
                         frameReceived = 1;
+                        g_ledIndicator = 1;
+        
                     }
                 }
             } else {
@@ -399,9 +401,6 @@ static uint8_t uart_error_count = 0;
         if (modbusTxMutex != NULL) {
             osMutexRelease(modbusTxMutex);
         }
-        
-        // Đánh dấu để LED nháy
-        g_ledIndicator = 1;
         
         // Reset buffer sau khi xử lý
         rxIndex = 0;

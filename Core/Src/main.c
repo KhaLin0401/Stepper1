@@ -22,6 +22,7 @@
 #include "MotorControl.h"
 #include "UartModbus.h"
 #include "ModbusMap.h"
+#include "DOutput.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
@@ -666,7 +667,9 @@ void StartIOTask(void *argument)
   {
     // Heartbeat LED toggle
     //HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-    
+    DOutput_Load(&doutput_state);
+    DOutput_Process(&doutput_state);
+    DOutput_Save(&doutput_state);
     // Update task counter
     g_taskCounter++;
     
@@ -675,7 +678,7 @@ void StartIOTask(void *argument)
     g_inputRegisters[1] = HAL_GetTick() & 0xFFFF;
     Read_ACS712();
     
-    osDelayUntil(previousTick += 1000); // 1 second delay
+    osDelayUntil(previousTick += 500); // 500ms delay
   }
   /* USER CODE END 5 */
 }

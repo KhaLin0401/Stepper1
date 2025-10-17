@@ -4,9 +4,9 @@
 ../Core/Src/UartModbus.c:179:10:updateDigitalIOStatus	8	static
 ../Core/Src/UartModbus.c:213:14:calcCRC	16	static
 ../Core/Src/UartModbus.c:229:10:HAL_UART_RxCpltCallback	8	static
-../Core/Src/UartModbus.c:276:10:HAL_UART_ErrorCallback	8	static
-../Core/Src/UartModbus.c:285:10:resetUARTCommunication	8	static
-../Core/Src/UartModbus.c:292:10:processModbusFrame	280	static
-../Core/Src/UartModbus.c:411:10:updateBaudrate	16	static
-../Core/Src/UartModbus.c:455:10:checkUARTHealth	16	static
-../Core/Src/UartModbus.c:470:10:startModbusUARTReception	8	static
+../Core/Src/UartModbus.c:278:10:HAL_UART_ErrorCallback	8	static
+../Core/Src/UartModbus.c:287:10:resetUARTCommunication	8	static
+../Core/Src/UartModbus.c:294:10:processModbusFrame	280	static
+../Core/Src/UartModbus.c:410:10:updateBaudrate	16	static
+../Core/Src/UartModbus.c:454:10:checkUARTHealth	16	static
+../Core/Src/UartModbus.c:469:10:startModbusUARTReception	8	static
