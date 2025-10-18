@@ -118,14 +118,16 @@ void SystemRegisters_Save(SystemRegisterMap_t* sys, uint16_t base_addr){
 
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor){
+    Motor1_Set_Direction(motor1.Direction);
+    Motor2_Set_Direction(motor2.Direction);
     if(motor->Enable == 1){
         if (motor == &motor1) {
             HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
-            Motor1_Set_Direction(motor->Direction);
+            
         }
         else {
             HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
-            Motor2_Set_Direction(motor->Direction);
+            
         }
         switch(motor->Control_Mode){
             case CONTROL_MODE_ONOFF:
@@ -142,7 +144,7 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
     else if(motor->Enable == 0){
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
-        motor->Direction = IDLE;
+        //motor->Direction = IDLE;
         motor->Actual_Speed = 0; // Reset actual speed when disabled
         
         if(motor == &motor1) {
@@ -548,4 +550,8 @@ void Motor_DebugPrint(const MotorRegisterMap_t* motor, const char* name){
 }
 void System_DebugPrint(const SystemRegisterMap_t* sys){
     // This can be implemented to output system status via UART if needed
+}
+
+void System_ResetError(void){
+    initializeModbusRegisters();
 }

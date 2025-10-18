@@ -138,6 +138,7 @@ uint8_t Motor_Get_Status_Word(MotorRegisterMap_t* motor);
 uint8_t Motor_Get_Error_Code(MotorRegisterMap_t* motor);
 
 
+void System_ResetError(void);
 // Xử lý ON/OFF mode (mode 1)
 uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor);
 
@@ -156,7 +157,7 @@ void Motor_SetDirection(uint8_t motor_id, uint8_t direction);  // 0=Idle, 1=Forw
 void MotionState_Init(uint8_t motor_id);
 void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual);
 // Reset các lỗi nếu có
-void Motor_ResetError(MotorRegisterMap_t* motor);
+void Motor_ResetSystem(void);
 
 // Kiểm tra và xử lý các điều kiện lỗi (overcurrent, timeout,...)
 void Motor_CheckError(MotorRegisterMap_t* motor);

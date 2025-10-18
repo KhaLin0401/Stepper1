@@ -751,9 +751,12 @@ void StartMotorTask(void *argument)
   for (;;)
   {
       // 1. Load dữ liệu từ Modbus registers
+      SystemRegisters_Load(&system, SYS_BASE_ADDR);
       MotorRegisters_Load(&motor1, M1_BASE_ADDR);
       MotorRegisters_Load(&motor2, M2_BASE_ADDR);
-      SystemRegisters_Load(&system, SYS_BASE_ADDR);
+      if(system.Reset_Error_Command == 1){
+        System_ResetSystem();
+      }
       updateBaudrate();
       // 2. Xử lý logic điều khiển motor 1
       Motor_ProcessControl(&motor1);
