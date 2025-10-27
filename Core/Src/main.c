@@ -740,7 +740,6 @@ void StartMotorTask(void *argument)
 {
   const uint16_t M1_BASE_ADDR = 0x0000;
   const uint16_t M2_BASE_ADDR = 0x0010;
-  const uint16_t SYS_BASE_ADDR = 0x0100;
   // Initialize PID controllers with default values
   uint32_t previousTick = osKernelGetTickCount();
   MotionState_Init(1);
@@ -751,7 +750,7 @@ void StartMotorTask(void *argument)
   for (;;)
   {
       // 1. Load dữ liệu từ Modbus registers
-      SystemRegisters_Load(&system, SYS_BASE_ADDR);
+      SystemRegisters_Load(&system);
       MotorRegisters_Load(&motor1, M1_BASE_ADDR);
       MotorRegisters_Load(&motor2, M2_BASE_ADDR);
       if(system.Reset_Error_Command == 1){
@@ -767,7 +766,7 @@ void StartMotorTask(void *argument)
       // 4. Save lại dữ liệu ngược ra Modbus registers
       MotorRegisters_Save(&motor1, M1_BASE_ADDR);
       MotorRegisters_Save(&motor2, M2_BASE_ADDR);
-      SystemRegisters_Save(&system, SYS_BASE_ADDR);
+      SystemRegisters_Save(&system);
       // 5. Delay theo chu kỳ task (ví dụ 10ms)
       osDelayUntil(previousTick += 20);
   }

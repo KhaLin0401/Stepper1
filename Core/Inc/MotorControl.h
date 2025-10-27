@@ -44,6 +44,9 @@ typedef struct {
     uint16_t Reset_Error_Command;  // 0x0004
     uint16_t Config_Baudrate;      // 0x0005
     uint16_t Config_Parity;        // 0x0006
+    uint16_t Config_Stop_Bit;      // 0x0007
+    uint16_t Module_Type;          // 0x0008
+    uint16_t Hardware_Version;     // 0x0009
 } SystemRegisterMap_t;
 
 typedef struct {
@@ -102,11 +105,11 @@ void MotorRegisters_Init(MotorRegisterMap_t* motor);
 
 // Load từ modbus registers
 void MotorRegisters_Load(MotorRegisterMap_t* motor, uint16_t base_addr);
-void SystemRegisters_Load(SystemRegisterMap_t* sys, uint16_t base_addr);
+void SystemRegisters_Load(SystemRegisterMap_t* sys);
 
 // Save lại vào modbus registers
 void MotorRegisters_Save(MotorRegisterMap_t* motor, uint16_t base_addr);
-void SystemRegisters_Save(SystemRegisterMap_t* sys, uint16_t base_addr);
+void SystemRegisters_Save(SystemRegisterMap_t* sys);
 
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor);
@@ -157,7 +160,7 @@ void Motor_SetDirection(uint8_t motor_id, uint8_t direction);  // 0=Idle, 1=Forw
 void MotionState_Init(uint8_t motor_id);
 void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual);
 // Reset các lỗi nếu có
-void Motor_ResetSystem(void);
+void System_ResetSystem(void);
 
 // Kiểm tra và xử lý các điều kiện lỗi (overcurrent, timeout,...)
 void Motor_CheckError(MotorRegisterMap_t* motor);
