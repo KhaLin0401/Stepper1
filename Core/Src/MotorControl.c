@@ -124,17 +124,19 @@ void SystemRegisters_Save(SystemRegisterMap_t* sys){
 
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor){
-    Motor1_Set_Direction(motor1.Direction);
-    Motor2_Set_Direction(motor2.Direction);
+    // Xử lý Enable/Disable trước
     if(motor->Enable == 1){
-        if (motor == &motor1) {
+        // Set direction cho motor tương ứng
+        if(motor == &motor1){
+            Motor1_Set_Direction(motor, motor->Direction);
             HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
-            
         }
-        else {
+        else if(motor == &motor2){
+            Motor2_Set_Direction(motor, motor->Direction);
             HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
-            
         }
+        
+        // Xử lý control mode
         switch(motor->Control_Mode){
             case CONTROL_MODE_ONOFF:
                 Motor_HandleOnOff(motor);
@@ -144,23 +146,24 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
                 break;
             default:
                 break;
-        } 
-        
+        }
     }
-    else if(motor->Enable == 0){
+    else{  // motor->Enable == 0
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
         //motor->Direction = IDLE;
-        motor->Actual_Speed = 0; // Reset actual speed when disabled
+        motor->Actual_Speed = 0;  // Reset actual speed when disabled
         
         if(motor == &motor1) {
 //            Motor1_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             //Motor1_Set_Direction(IDLE);           // Set direction to IDLE
             HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_SET);
+            m1_motion_state.v_actual = 0;
         } else {
 //            Motor2_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             //Motor2_Set_Direction(IDLE);           // Set direction to IDLE
             HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_SET);
+            m2_motion_state.v_actual = 0;
         }
     }
 }
@@ -178,19 +181,18 @@ void Motor_Set_Disable(MotorRegisterMap_t* motor){
 
 
 
-void Motor1_Set_Direction(uint8_t direction){
+void Motor1_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction){
     if(direction == IDLE){
-        motor1.Direction = IDLE;
+        motor->Direction = IDLE;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
 
-        motor1.Command_Speed = 0; 
-        // ✅ CRITICAL FIX: STOP ALL PWM CHANNELS WHEN IDLE
+        //motor1.Command_Speed = 0; 
         if(PWM_Channel_Flag_1 == 1){
             HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
             PWM_Channel_Flag_1 = 0;
         }
     }else if(direction == FORWARD){
-        motor1.Direction = FORWARD;
+        motor->Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_SET);
         if(PWM_Channel_Flag_1 == 0){
             HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
@@ -198,7 +200,7 @@ void Motor1_Set_Direction(uint8_t direction){
         }
                 // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
-        motor1.Direction = REVERSE;
+        motor->Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
         if(PWM_Channel_Flag_1 == 0){
             HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
@@ -207,18 +209,18 @@ void Motor1_Set_Direction(uint8_t direction){
         // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }
 }
-void Motor2_Set_Direction(uint8_t direction){
+void Motor2_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction){
     if(direction == IDLE){
-        motor2.Direction = IDLE;
+        motor->Direction = IDLE;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
-        motor2.Command_Speed = 0; 
+        //motor2.Command_Speed = 0; 
         
         if(PWM_Channel_Flag_2 == 1){
             HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
             PWM_Channel_Flag_2 = 0;
         }
     }else if(direction == FORWARD){
-        motor2.Direction = FORWARD;
+        motor->Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_SET);
         if(PWM_Channel_Flag_2 == 0){
             HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
@@ -226,7 +228,7 @@ void Motor2_Set_Direction(uint8_t direction){
         }
         // motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
-        motor2.Direction = REVERSE;
+        motor->Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
         if(PWM_Channel_Flag_2 == 0){
             HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);

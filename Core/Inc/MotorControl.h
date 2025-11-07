@@ -154,7 +154,9 @@ void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent);  // moto
 void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent);  // motor_id = 1 hoặc 2
 
 // Điều khiển chiều quay motor
-void Motor_SetDirection(uint8_t motor_id, uint8_t direction);  // 0=Idle, 1=Forward, 2=Reverse
+void Motor_SetDirection(uint8_t motor_id, uint8_t direction);
+void Motor1_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction);  // 0=Idle, 1=Forward, 2=Reverse
+void Motor2_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction);  // 0=Idle, 1=Forward, 2=Reverse
 
 // Khởi tạo giá trị PID cho từng motor
 void MotionState_Init(uint8_t motor_id);
