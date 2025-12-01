@@ -125,6 +125,7 @@ void SystemRegisters_Save(SystemRegisterMap_t* sys){
 // Xử lý logic điều khiển motor
 void Motor_ProcessControl(MotorRegisterMap_t* motor){
     // Xử lý Enable/Disable trước
+    
     if(motor->Enable == 1){
         // Set direction cho motor tương ứng
         if(motor == &motor1){
@@ -148,9 +149,10 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
                 break;
         }
     }
-    else{  // motor->Enable == 0
+    else if (motor->Enable == 0) {  // motor->Enable == 0
         motor->Status_Word = 0x0000;
         g_holdingRegisters[REG_M1_STATUS_WORD] = 0x0000;
+        
         //motor->Direction = IDLE;
         motor->Actual_Speed = 0;  // Reset actual speed when disabled
         
