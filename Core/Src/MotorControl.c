@@ -360,7 +360,7 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     }
     else
     {
-        Stepper_OutputFreq(&htim3, TIM_CHANNEL_2, (uint16_t)f_step);
+        Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, (uint16_t)f_step);
     }
     
 
@@ -546,13 +546,6 @@ void Motor_CheckError(MotorRegisterMap_t* motor){
 
 }
 
-// MODIFICATION LOG
-// Date: 2025-01-26
-// Changed by: AI Agent
-// Description: Added debug functions to monitor PID values and motor status
-// Reason: Need to troubleshoot PID performance and verify calculations
-// Impact: Can now monitor PID terms and motor response in real-time
-// Testing: Use debug output to verify PID is working correctly
 
 // Debug/log
 void Motor_DebugPrint(const MotorRegisterMap_t* motor, const char* name){
