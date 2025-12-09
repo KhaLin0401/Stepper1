@@ -1,7 +1,8 @@
-../Core/Src/main.c:662:6:StartIOTask	1
-../Core/Src/main.c:694:6:StartUartTask	5
-../Core/Src/main.c:740:6:StartMotorTask	2
-../Core/Src/main.c:783:6:StartVisibleTask	2
-../Core/Src/main.c:242:6:SystemClock_Config	4
-../Core/Src/main.c:122:5:main	23
-../Core/Src/main.c:804:6:Error_Handler	1
+../Core/Src/main.c:627:6:StartIOTask	1
+../Core/Src/main.c:659:6:StartUartTask	5
+../Core/Src/main.c:704:6:StartMotorTask	2
+../Core/Src/main.c:749:6:StartVisibleTask	2
+../Core/Src/main.c:775:6:StartEncodeTask	1
+../Core/Src/main.c:246:6:SystemClock_Config	3
+../Core/Src/main.c:127:5:main	21
+../Core/Src/main.c:792:6:Error_Handler	1

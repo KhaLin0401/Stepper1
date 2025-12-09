@@ -1,0 +1,10 @@
+../Core/Src/Encoder.c:35:6:Encoder_Init	1
+../Core/Src/Encoder.c:137:6:Encoder_Reset	1
+../Core/Src/Encoder.c:148:6:Encoder_Save_Velocity	1
+../Core/Src/Encoder.c:152:6:Encoder_Save_Pulse_Count	1
+../Core/Src/Encoder.c:156:6:Encoder_Save_Reset_Flag	1
+../Core/Src/Encoder.c:160:6:Encoder_Load_Diameter	1
+../Core/Src/Encoder.c:164:6:Encoder_Load_Reset_Flag	1
+../Core/Src/Encoder.c:168:6:Encoder_Load_Revolutions	1
+../Core/Src/Encoder.c:62:6:Encoder_Update	6
+../Core/Src/Encoder.c:173:6:Encoder_Get_Velocity	1

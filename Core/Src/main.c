@@ -27,6 +27,7 @@
 #include "UartModbus.h"
 #include "ModbusMap.h"
 #include "DOutput.h"
+#include "Encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,8 +46,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
-
 I2C_HandleTypeDef hi2c1;
 
 TIM_HandleTypeDef htim1;
@@ -58,7 +57,6 @@ uint8_t current_baudrate = DEFAULT_CONFIG_BAUDRATE;
 
 uint8_t PWM_Channel_Flag_1 = 0;
 uint8_t PWM_Channel_Flag_2 = 0;
-
 /* Definitions for IOTask */
 osThreadId_t IOTaskHandle;
 const osThreadAttr_t IOTask_attributes = {
@@ -87,6 +85,13 @@ const osThreadAttr_t VisibleTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
+/* Definitions for encoderTask */
+osThreadId_t encoderTaskHandle;
+const osThreadAttr_t encoderTask_attributes = {
+  .name = "encoderTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal5,
+};
 /* USER CODE BEGIN PV */
 // Modbus register arrays
 
@@ -100,11 +105,11 @@ static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_ADC1_Init(void);
 void StartIOTask(void *argument);
 void StartUartTask(void *argument);
 void StartMotorTask(void *argument);
 void StartVisibleTask(void *argument);
+void StartEncodeTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -146,11 +151,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
-  MX_ADC1_Init();
-  if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) == HAL_OK)
-    PWM_Channel_Flag_1 = 1;
-  if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) == HAL_OK)
-    PWM_Channel_Flag_1 = 1;
   /* USER CODE BEGIN 2 */
 
   // Start PWM timers for motor control
@@ -167,6 +167,7 @@ int main(void)
   //   g_holdingRegisters[i] = 0;
   // }
   initializeModbusRegisters();
+  Encoder_Init();
   // Set some default values for important registers
   
   // Initialize UART buffer
@@ -211,6 +212,9 @@ int main(void)
   /* creation of VisibleTask */
   VisibleTaskHandle = osThreadNew(StartVisibleTask, NULL, &VisibleTask_attributes);
 
+  /* creation of encoderTask */
+  encoderTaskHandle = osThreadNew(StartEncodeTask, NULL, &encoderTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -243,7 +247,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -273,59 +276,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ADC1_Init(void)
-{
-
-  /* USER CODE BEGIN ADC1_Init 0 */
-
-  /* USER CODE END ADC1_Init 0 */
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN ADC1_Init 1 */
-
-  /* USER CODE END ADC1_Init 1 */
-
-  /** Common config
-  */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  if (HAL_ADC_Init(&hadc1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ADC1_Init 2 */
-
-  /* USER CODE END ADC1_Init 2 */
-
 }
 
 /**
@@ -453,8 +403,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
@@ -469,14 +420,28 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
+  sSlaveConfig.InputTrigger = TIM_TS_TI1F_ED;
+  sSlaveConfig.TriggerFilter = 8;
+  if (HAL_TIM_SlaveConfigSynchro(&htim2, &sSlaveConfig) != HAL_OK)
   {
     Error_Handler();
   }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_TRC;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -604,7 +569,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED4_Pin|LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED1_Pin|DIR_1_Pin|EN_1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, DIR_1_Pin|EN_1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, DIR_2_Pin|EN_2_Pin|OUT2_Pin|OUT1_Pin, GPIO_PIN_RESET);
@@ -616,8 +581,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED1_Pin DIR_1_Pin EN_1_Pin */
-  GPIO_InitStruct.Pin = LED1_Pin|DIR_1_Pin|EN_1_Pin;
+  /*Configure GPIO pins : DIR_1_Pin EN_1_Pin */
+  GPIO_InitStruct.Pin = DIR_1_Pin|EN_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -677,7 +642,7 @@ void StartIOTask(void *argument)
     // Update input registers periodically (simulate sensor data)
     g_inputRegisters[0] = g_taskCounter;
     g_inputRegisters[1] = HAL_GetTick() & 0xFFFF;
-    Read_ACS712();
+    //Read_ACS712();
     
     osDelayUntil(previousTick += 500); // 500ms delay
   }
@@ -694,8 +659,6 @@ void StartIOTask(void *argument)
 void StartUartTask(void *argument)
 {
   /* USER CODE BEGIN StartUartTask */
-  
-  // Bật UART IT TRƯỚC KHI tính toán
   startModbusUARTReception();
   
   // Tính toán thời gian timeout dựa trên baudrate
@@ -728,6 +691,7 @@ void StartUartTask(void *argument)
     // Delay 1ms
     osDelayUntil(previousTick += 20);
   }
+  /* USER CODE END StartUartTask */
 }
 
 /* USER CODE BEGIN Header_StartMotorTask */
@@ -739,6 +703,7 @@ void StartUartTask(void *argument)
 /* USER CODE END Header_StartMotorTask */
 void StartMotorTask(void *argument)
 {
+  /* USER CODE BEGIN StartMotorTask */
   const uint16_t M1_BASE_ADDR = 0x0000;
   const uint16_t M2_BASE_ADDR = 0x0010;
   // Initialize PID controllers with default values
@@ -771,6 +736,7 @@ void StartMotorTask(void *argument)
       // 5. Delay theo chu kỳ task (ví dụ 10ms)
       osDelayUntil(previousTick += 20);
   }
+  /* USER CODE END StartMotorTask */
 }
 
 /* USER CODE BEGIN Header_StartVisibleTask */
@@ -782,6 +748,7 @@ void StartMotorTask(void *argument)
 /* USER CODE END Header_StartVisibleTask */
 void StartVisibleTask(void *argument)
 {
+  /* USER CODE BEGIN StartVisibleTask */
   uint32_t previousTick = osKernelGetTickCount();
   for(;;)
   {
@@ -793,8 +760,29 @@ void StartVisibleTask(void *argument)
       g_ledIndicator = 0;
     }
 
-    osDelayUntil(previousTick += 250); // giữ chu kỳ chính xác 250ms
+    osDelayUntil(previousTick += 120); // giữ chu kỳ chính xác 250ms
   }
+  /* USER CODE END StartVisibleTask */
+}
+
+/* USER CODE BEGIN Header_StartEncodeTask */
+/**
+* @brief Function implementing the encoderTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartEncodeTask */
+void StartEncodeTask(void *argument)
+{
+  /* USER CODE BEGIN StartEncodeTask */
+  uint32_t previousTick = osKernelGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+    Encoder_Update();
+    osDelayUntil(previousTick += 100);
+  }
+  /* USER CODE END StartEncodeTask */
 }
 
 /**

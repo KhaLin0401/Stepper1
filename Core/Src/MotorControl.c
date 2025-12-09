@@ -421,42 +421,42 @@ void MotionState_Init(uint8_t motor_id){
 }
 
 // Gửi tín hiệu PWM dựa vào Actual_Speed
-void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
-    // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
-    uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim3);
-    uint32_t ccr = duty_percent * arr / 100; // ✅ FIX: Sử dụng duty_percent thay vì hardcode 50%
+// void Motor1_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
+//     // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
+//     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim3);
+//     uint32_t ccr = duty_percent * arr / 100; // ✅ FIX: Sử dụng duty_percent thay vì hardcode 50%
     
-    // ✅ DEBUG: In thông tin PWM
-    printf("Motor1 PWM: duty=%d%%, arr=%lu, ccr=%lu, dir=%d\n", 
-           duty_percent, arr, ccr, motor->Direction);
+//     // ✅ DEBUG: In thông tin PWM
+//     printf("Motor1 PWM: duty=%d%%, arr=%lu, ccr=%lu, dir=%d\n", 
+//            duty_percent, arr, ccr, motor->Direction);
     
-    // ✅ FIX: Kiểm tra điều kiện phát xung
-    if(duty_percent == 0) {
-        // Dừng PWM khi duty = 0
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
-        printf("Motor1 PWM: STOPPED (duty=0)\n");
-        return;
-    }
+//     // ✅ FIX: Kiểm tra điều kiện phát xung
+//     if(duty_percent == 0) {
+//         // Dừng PWM khi duty = 0
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+//         printf("Motor1 PWM: STOPPED (duty=0)\n");
+//         return;
+//     }
     
-    // ✅ FIX: Phát xung theo chiều quay
-    if(motor->Direction == FORWARD){
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
-        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
-        printf("Motor1 PWM: FORWARD CH1, ccr=%lu\n", ccr);
-    }else if(motor->Direction == REVERSE){
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, ccr);
-        printf("Motor1 PWM: REVERSE CH2, ccr=%lu\n", ccr);
-    }else{
-        // IDLE - dừng tất cả PWM
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-        // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
-        printf("Motor1 PWM: IDLE - STOPPED\n");
-    }
-}
+//     // ✅ FIX: Phát xung theo chiều quay
+//     if(motor->Direction == FORWARD){
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+//         HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+//         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
+//         printf("Motor1 PWM: FORWARD CH1, ccr=%lu\n", ccr);
+//     }else if(motor->Direction == REVERSE){
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+//         HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+//         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, ccr);
+//         printf("Motor1 PWM: REVERSE CH2, ccr=%lu\n", ccr);
+//     }else{
+//         // IDLE - dừng tất cả PWM
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+//         // HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+//         printf("Motor1 PWM: IDLE - STOPPED\n");
+//     }
+// }
 
 uint8_t getActualSpeed(uint8_t motor_id) {
     // For now, simulate speed based on PWM duty with some delay/filtering
@@ -508,23 +508,23 @@ static uint32_t GetTimerInputClockHz(TIM_HandleTypeDef *htim)
     return tim_clk;
 }
 
-void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
-    // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
-    uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim1);
-    uint32_t ccr = duty_percent * arr / 100;
+// void Motor2_OutputPWM(MotorRegisterMap_t* motor, uint8_t duty_percent){
+//     // Chuyển % thành giá trị phù hợp với Timer (0 - TIM_ARR)
+//     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(&htim1);
+//     uint32_t ccr = duty_percent * arr / 100;
     
-    if(motor->Direction == FORWARD){
-        // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
-    }else if(motor->Direction == REVERSE){
-        // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-        HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ccr);
-    }
+//     if(motor->Direction == FORWARD){
+//         // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+//         HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+//         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
+//     }else if(motor->Direction == REVERSE){
+//         // HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+//         HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+//         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ccr);
+//     }
 
     
-}
+// }
 
 // Điều khiển chiều quay motor
 

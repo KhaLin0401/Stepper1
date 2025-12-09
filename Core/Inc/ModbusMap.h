@@ -66,6 +66,12 @@
 #define REG_DO2_CONTROL            0x0033
 #define REG_DO2_ASSIGNMENT         0x0034
 
+#define REG_FEEDBACK_VELOCITY      0x0035
+#define REG_FEEDBACK_PULSE_COUNT   0x0036
+#define REG_DIAMETER               0x0037
+#define REG_REVOLUTIONS            0x0038
+#define REG_RESET_FLAG             0x0039
+
 // Total register count
 #define TOTAL_HOLDING_REG_COUNT    0x0045  // Total number of registers
 
@@ -90,7 +96,7 @@
 #define DEFAULT_DIRECTION          0       // Idle
 #define DEFAULT_MAX_SPEED          100
 #define DEFAULT_MIN_SPEED          0
-#define DEFAULT_VMAX               20      // ×100
+#define DEFAULT_VMAX               5      // ×100
 #define DEFAULT_AMAX               5       // ×100
 #define DEFAULT_JMAX               2        // ×100
 #define DEFAULT_VMIN               400
@@ -109,6 +115,13 @@
 #define DIRECTION_FORWARD         1
 #define DIRECTION_REVERSE         2
 
+// Encoder Values
+#define DEFAULT_ENCODER_RESET_FLAG        0
+#define DEFAULT_ENCODER_VELOCITY          0         //mm/s
+#define DEFAULT_ENCODER_PULSE_COUNT       0         //pulse
+#define DEFAULT_ENCODER_DIAMETER          50         //mm
+#define DEFAULT_ENCODER_REVOLUTIONS       12         //revolution
+
 // Digital I/O Assignment Values
 #define DIO_ASSIGN_NONE           0
 #define DIO_ASSIGN_START_M1       1
@@ -121,5 +134,6 @@
 #define DIO_ASSIGN_REVERSE_M2     8
 #define DIO_ASSIGN_EMERGENCY_STOP 9
 #define DIO_ASSIGN_JOG_MODE       10
+
 
 #endif // 

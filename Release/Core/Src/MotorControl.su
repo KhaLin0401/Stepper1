@@ -17,9 +17,7 @@
 ../Core/Src/MotorControl.c:287:9:Motor_HandleRamp	56	static
 ../Core/Src/MotorControl.c:126:6:Motor_ProcessControl	8	static
 ../Core/Src/MotorControl.c:412:6:MotionState_Init	0	static
-../Core/Src/MotorControl.c:424:6:Motor1_OutputPWM	32	static
 ../Core/Src/MotorControl.c:461:9:getActualSpeed	0	static
-../Core/Src/MotorControl.c:511:6:Motor2_OutputPWM	16	static
 ../Core/Src/MotorControl.c:540:6:Motor_ResetError	0	static
 ../Core/Src/MotorControl.c:545:6:Motor_CheckError	0	static
 ../Core/Src/MotorControl.c:551:6:Motor_DebugPrint	0	static

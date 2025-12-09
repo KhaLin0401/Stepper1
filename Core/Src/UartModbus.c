@@ -96,6 +96,14 @@ static uint8_t uart_error_count = 0;
         g_holdingRegisters[REG_DI3_ASSIGNMENT] = 0;
         g_holdingRegisters[REG_DI4_ASSIGNMENT] = 0;
         g_holdingRegisters[REG_CURRENT] = DEFAULT_CURRENT;
+
+        //Encoder Registers (0x0035-0x0039)
+        g_holdingRegisters[REG_FEEDBACK_VELOCITY] = DEFAULT_ENCODER_VELOCITY;
+        g_holdingRegisters[REG_FEEDBACK_PULSE_COUNT] = DEFAULT_ENCODER_PULSE_COUNT;
+        g_holdingRegisters[REG_DIAMETER] = DEFAULT_ENCODER_DIAMETER;
+        g_holdingRegisters[REG_REVOLUTIONS] = DEFAULT_ENCODER_REVOLUTIONS;
+        g_holdingRegisters[REG_RESET_FLAG] = DEFAULT_ENCODER_RESET_FLAG;
+
         // Output Registers (0x0040-0x0044)  
         g_holdingRegisters[REG_DO_STATUS_WORD] = 0;
         g_holdingRegisters[REG_DO1_CONTROL] = 0;
