@@ -89,17 +89,17 @@
 
 
 // Default Values for Motor Registers
-#define DEFAULT_CONTROL_MODE       1       // ONOFF mode
+#define DEFAULT_CONTROL_MODE       2       // ONOFF mode
 #define DEFAULT_ENABLE             0       // Disabled
 #define DEFAULT_COMMAND_SPEED      0
 #define DEFAULT_ACTUAL_SPEED       0
 #define DEFAULT_DIRECTION          0       // Idle
 #define DEFAULT_MAX_SPEED          100
 #define DEFAULT_MIN_SPEED          0
-#define DEFAULT_VMAX               5      // ×100
+#define DEFAULT_VMAX               8      // ×100
 #define DEFAULT_AMAX               5       // ×100
 #define DEFAULT_JMAX               2        // ×100
-#define DEFAULT_VMIN               400
+#define DEFAULT_VMIN               1
 #define DEFAULT_MAX_ACCELERATION   5
 #define DEFAULT_MAX_DECELERATION   4
 #define DEFAULT_STATUS_WORD        0x0000
