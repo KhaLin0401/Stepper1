@@ -99,7 +99,7 @@
 #define DEFAULT_VMAX               8      // ×100
 #define DEFAULT_AMAX               5       // ×100
 #define DEFAULT_JMAX               2        // ×100
-#define DEFAULT_VMIN               1
+#define DEFAULT_VMIN               8
 #define DEFAULT_MAX_ACCELERATION   5
 #define DEFAULT_MAX_DECELERATION   4
 #define DEFAULT_STATUS_WORD        0x0000
