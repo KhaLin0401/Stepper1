@@ -6,5 +6,5 @@
 ../Core/Src/Encoder.c:160:6:Encoder_Load_Diameter	0	static
 ../Core/Src/Encoder.c:164:6:Encoder_Load_Reset_Flag	0	static
 ../Core/Src/Encoder.c:168:6:Encoder_Load_Revolutions	0	static
-../Core/Src/Encoder.c:62:6:Encoder_Update	32	static
+../Core/Src/Encoder.c:62:6:Encoder_Update	40	static
 ../Core/Src/Encoder.c:173:6:Encoder_Get_Velocity	0	static

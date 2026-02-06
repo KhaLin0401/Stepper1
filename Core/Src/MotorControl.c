@@ -14,6 +14,18 @@ SystemRegisterMap_t system;
 MotionState_t m1_motion_state;
 MotionState_t m2_motion_state;
 
+// Shadow registers để cập nhật ARR/CCR tại Update Event (tránh jitter)
+typedef struct {
+    uint32_t psc;
+    uint32_t arr;
+    uint32_t ccr;
+    uint8_t update_pending;  // Flag báo có giá trị mới cần cập nhật
+    float v_current;          // ✅ Tốc độ hiện tại đã được set (để so sánh tránh cập nhật không cần thiết)
+} TimerShadowReg_t;
+
+TimerShadowReg_t tim1_shadow = {0, 0, 0, 0, 0.0f};
+TimerShadowReg_t tim3_shadow = {0, 0, 0, 0, 0.0f};
+
 uint16_t mapRegisterAddress(uint16_t modbusAddress) {
     // System registers (0x0000-0x0006)
     if (modbusAddress <= 0x0006) {
@@ -131,10 +143,18 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
         if(motor == &motor1){
             Motor1_Set_Direction(motor, motor->Direction);
             HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_RESET);
+            if(PWM_Channel_Flag_1 == 0){
+                HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+                PWM_Channel_Flag_1 = 1;
+            }
         }
         else if(motor == &motor2){
             Motor2_Set_Direction(motor, motor->Direction);
             HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_RESET);
+            if(PWM_Channel_Flag_2 == 0){
+                HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+                PWM_Channel_Flag_2 = 1;
+            }
         }
         
         // Xử lý control mode
@@ -161,11 +181,19 @@ void Motor_ProcessControl(MotorRegisterMap_t* motor){
             //Motor1_Set_Direction(IDLE);           // Set direction to IDLE
             HAL_GPIO_WritePin(EN_1_GPIO_Port, EN_1_Pin, GPIO_PIN_SET);
             m1_motion_state.v_actual = 0;
+            if(PWM_Channel_Flag_1 == 1){
+                HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+                PWM_Channel_Flag_1 = 0;
+            }
         } else {
 //            Motor2_OutputPWM(motor, 0);           // Stop PWM with 0% duty
             //Motor2_Set_Direction(IDLE);           // Set direction to IDLE
             HAL_GPIO_WritePin(EN_2_GPIO_Port, EN_2_Pin, GPIO_PIN_SET);
             m2_motion_state.v_actual = 0;
+            if(PWM_Channel_Flag_2 == 1){
+                HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+                PWM_Channel_Flag_2 = 0;
+            }
         }
     }
 }
@@ -189,25 +217,29 @@ void Motor1_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction){
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
 
         //motor1.Command_Speed = 0; 
-        if(PWM_Channel_Flag_1 == 1){
-            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-            PWM_Channel_Flag_1 = 0;
-        }
+        // if(PWM_Channel_Flag_1 == 1){
+        //     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+        //     PWM_Channel_Flag_1 = 0;
+        // }
     }else if(direction == FORWARD){
         motor->Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_SET);
-        if(PWM_Channel_Flag_1 == 0){
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-            PWM_Channel_Flag_1 = 1;
-        }
+        // if(PWM_Channel_Flag_1 == 0){
+        //     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+        //     // ✅ FIX JITTER: Update interrupt sẽ được enable tự động khi có update_pending
+        //     // Không cần enable ở đây để tránh interrupt không cần thiết
+        //     PWM_Channel_Flag_1 = 1;
+        // }
                 // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor->Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_1_GPIO_Port, DIR_1_Pin, GPIO_PIN_RESET);
-        if(PWM_Channel_Flag_1 == 0){
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-            PWM_Channel_Flag_1 = 1;
-        }
+        // if(PWM_Channel_Flag_1 == 0){
+        //     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+        //     // ✅ FIX JITTER: Update interrupt sẽ được enable tự động khi có update_pending
+        //     // Không cần enable ở đây để tránh interrupt không cần thiết
+        //     PWM_Channel_Flag_1 = 1;
+        // }
         // motor1.Actual_Speed = motor1.Command_Speed; // Set actual speed to command speed
     }
 }
@@ -217,25 +249,29 @@ void Motor2_Set_Direction(MotorRegisterMap_t* motor, uint8_t direction){
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
         //motor2.Command_Speed = 0; 
         
-        if(PWM_Channel_Flag_2 == 1){
-            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
-            PWM_Channel_Flag_2 = 0;
-        }
+        // if(PWM_Channel_Flag_2 == 1){
+        //     HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);  // ✅ Motor2 dùng TIM1 channel 1
+        //     PWM_Channel_Flag_2 = 0;
+        // }
     }else if(direction == FORWARD){
         motor->Direction = FORWARD;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_SET);
-        if(PWM_Channel_Flag_2 == 0){
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-            PWM_Channel_Flag_2 = 1;
-        }
+        // if(PWM_Channel_Flag_2 == 0){
+        //     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  // ✅ Motor2 dùng TIM1 channel 1
+        //     // ✅ FIX JITTER: Update interrupt sẽ được enable tự động khi có update_pending
+        //     // Không cần enable ở đây để tránh interrupt không cần thiết
+        //     PWM_Channel_Flag_2 = 1;
+        // }
         // motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }else if(direction == REVERSE){
         motor->Direction = REVERSE;
         HAL_GPIO_WritePin(DIR_2_GPIO_Port, DIR_2_Pin, GPIO_PIN_RESET);
-        if(PWM_Channel_Flag_2 == 0){
-            HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-            PWM_Channel_Flag_2 = 1;
-        }
+        // if(PWM_Channel_Flag_2 == 0){
+        //     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  // ✅ Motor2 dùng TIM1 channel 1
+        //     // ✅ FIX JITTER: Update interrupt sẽ được enable tự động khi có update_pending
+        //     // Không cần enable ở đây để tránh interrupt không cần thiết
+        //     PWM_Channel_Flag_2 = 1;
+        // }
         // motor2.Actual_Speed = motor2.Command_Speed; // Set actual speed to command speed
     }
 }
@@ -262,6 +298,19 @@ void Motor_Set_Jmax(MotorRegisterMap_t* motor, uint8_t jmax){
 uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
     uint8_t motor_id = (motor == &motor1) ? 1 : 2;
     uint16_t v_target, v_actual;
+    
+    // ✅ FIX: Khi Command_Speed = 0, dừng hoàn toàn (không phát xung)
+    if (motor->Command_Speed == 0) {
+        motor->Actual_Speed = 0;
+        // Dừng PWM
+        if(motor_id == 1){
+            Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, 0);
+        } else {
+            Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, 0);
+        }
+        return 0;
+    }
+    
     v_target = DEFAULT_VMIN + (motor->Vmax*100 - DEFAULT_VMIN) * (motor->Command_Speed / 100.0f);
     v_actual = v_target;
     float percent_speed = 0.0f;
@@ -272,11 +321,11 @@ uint8_t Motor_HandleOnOff(MotorRegisterMap_t* motor) {
 
     /* ------------------ 7) Tính PSC/ARR tối ưu và cập nhật timer (tần số step) ------------------ */
     if(motor_id == 1){
-        Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, v_actual);
+        Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, v_actual);  // Motor1 dùng TIM3 CH1
     }
     else
     {
-        Stepper_OutputFreq(&htim3, TIM_CHANNEL_2, v_actual);
+        Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, v_actual);  // Motor2 dùng TIM1 CH1
     }
     
 
@@ -307,7 +356,11 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
 
     /* ------------------ 2) Tính v_target từ Command_Speed (0..100) ------------------ */
     /* Ánh xạ percent -> vận tốc (steps/s). Command_Speed là 0..100 (%). */
+    if(motor->Command_Speed <= 0.1f){
+        motion_state->v_target = 0;
+    }else{
     motion_state->v_target = DEFAULT_VMIN + (motor->Vmax*100 - DEFAULT_VMIN) * (motor->Command_Speed / 100.0f);
+    }
 
     /* ------------------ 3) Cập nhật jerk -> acceleration ------------------ */
     float dv = motion_state->v_target - motion_state->v_actual;
@@ -330,8 +383,9 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     // Giới hạn trong [0, v_target]
     if (motion_state->v_actual > motor->Vmax*100)
         motion_state->v_actual = motor->Vmax*100;
-    if (motion_state->v_actual < DEFAULT_VMIN)
-        motion_state->v_actual = DEFAULT_VMIN;
+    // ✅ FIX: Cho phép v_actual = 0 khi Command_Speed = 0
+    if (motion_state->v_actual < 0)
+        motion_state->v_actual = 0;
 
    /* Soft clamp to target */
     if ((motion_state->a < 0) && (motion_state->v_actual <= motion_state->v_target)) {
@@ -356,11 +410,11 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
     /* ------------------ 7) Tính PSC/ARR tối ưu và cập nhật timer (tần số step) ------------------ */
     float f_step = motion_state->v_actual; // step/s (Hz)
     if(motor_id == 1){
-        Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, (uint16_t)f_step);
+        Stepper_OutputFreq(&htim3, TIM_CHANNEL_1, (uint16_t)f_step);  // Motor1 dùng TIM3 CH1
     }
     else
     {
-        Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, (uint16_t)f_step);
+        Stepper_OutputFreq(&htim1, TIM_CHANNEL_1, (uint16_t)f_step);  // Motor2 dùng TIM1 CH1
     }
     
 
@@ -368,14 +422,40 @@ uint8_t Motor_HandleRamp(MotorRegisterMap_t* motor) {
 }
 
 // Hàm phát xung STEP với tần số = v_actual (Hz), duty = 50%
+// ✅ FIX JITTER: Chỉ cập nhật shadow register, Update Event interrupt sẽ cập nhật thực tế
+// ✅ Tối ưu: Chỉ cập nhật khi tốc độ thay đổi để giảm rung động cơ
 void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actual)
 {
+    TimerShadowReg_t *shadow = NULL;
+    
+    // Xác định shadow register tương ứng
+    // ✅ Motor1 dùng TIM3 CH1, Motor2 dùng TIM1 CH1
+    if (htim->Instance == TIM1) {
+        shadow = &tim1_shadow;  // Motor2
+    } else if (htim->Instance == TIM3) {
+        shadow = &tim3_shadow;  // Motor1
+    } else {
+        return; // Timer không được hỗ trợ
+    }
 
-    if (v_actual <= 400.0f) {
-        __HAL_TIM_SET_COMPARE(htim, channel, 0); 
+    // ✅ FIX: Khi v_actual = 0 hoặc rất thấp, dừng PWM hoàn toàn
+    if (v_actual <= 0.1f) {
+        // Dừng PWM bằng cách set CCR = 0
+        __HAL_TIM_SET_COMPARE(htim, channel, 0);
+        shadow->v_current = 0.0f;
+        shadow->update_pending = 0;
         return;
     }
     if (v_actual > 50000.0f) v_actual = 50000.0f;
+
+    // ✅ Tối ưu: Kiểm tra nếu tốc độ không thay đổi đáng kể thì không cần cập nhật
+    // Sử dụng threshold 0.1 Hz để tránh floating point comparison issues
+    // và tránh cập nhật liên tục khi tốc độ ổn định
+    const float SPEED_THRESHOLD = 0.1f;  // Ngưỡng thay đổi tốc độ (Hz)
+    if (fabsf(v_actual - shadow->v_current) < SPEED_THRESHOLD) {
+        // Tốc độ không thay đổi đáng kể, không cần cập nhật timer
+        return;
+    }
 
     uint32_t timer_clk;
     if (htim->Instance == TIM1) {
@@ -400,13 +480,20 @@ void Stepper_OutputFreq(TIM_HandleTypeDef *htim, uint32_t channel, float v_actua
     if (arr > 0) arr -= 1;
     if (arr > 0xFFFF) arr = 0xFFFF;
 
-    htim->Instance->PSC = psc;
-    htim->Instance->ARR = arr;
-    htim->Instance->EGR = TIM_EGR_UG;
-
     uint32_t ccr = (arr + 1) / 2;
     if (ccr < 1) ccr = 1;
-    __HAL_TIM_SET_COMPARE(htim, channel, ccr);
+
+    // ✅ FIX JITTER: Chỉ cập nhật shadow register (không thay đổi timer trực tiếp)
+    // Update Event interrupt sẽ cập nhật ARR/CCR tại thời điểm an toàn
+    shadow->psc = psc;
+    shadow->arr = arr;
+    shadow->ccr = ccr;
+    shadow->v_current = v_actual;  // Lưu tốc độ hiện tại
+    shadow->update_pending = 1;  // Đánh dấu có giá trị mới cần cập nhật
+    
+    // ✅ FIX UART TIMEOUT: Chỉ enable Update interrupt khi có update_pending
+    // Điều này giảm số lần interrupt không cần thiết
+    __HAL_TIM_ENABLE_IT(htim, TIM_IT_UPDATE);
 }
 
 void MotionState_Init(uint8_t motor_id){

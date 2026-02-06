@@ -22,6 +22,7 @@
 #include "stm32f1xx_it.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "MotorControl.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -62,6 +63,18 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
+
+// ✅ FIX JITTER: Shadow register để cập nhật ARR/CCR tại Update Event
+typedef struct {
+    uint32_t psc;
+    uint32_t arr;
+    uint32_t ccr;
+    uint8_t update_pending;
+} TimerShadowReg_t;
+
+extern TimerShadowReg_t tim1_shadow;  // Motor2 dùng TIM1 CH1
+extern TimerShadowReg_t tim3_shadow;  // Motor1 dùng TIM3 CH1
+extern TimerShadowReg_t tim3_ch2_shadow;  // ✅ FIX MOTOR2: Shadow register riêng cho TIM3 channel 2
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -219,7 +232,29 @@ void TIM1_BRK_IRQHandler(void)
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
-
+  // ✅ FIX JITTER: Cập nhật ARR/CCR tại Update Event để tránh jitter
+  // ✅ FIX UART TIMEOUT: Tối ưu logic để chạy nhanh, chỉ xử lý khi cần
+  if (__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE) != RESET) {
+      if (__HAL_TIM_GET_IT_SOURCE(&htim1, TIM_IT_UPDATE) != RESET) {
+          // Chỉ xử lý nếu có update_pending để giảm overhead
+          if (tim1_shadow.update_pending) {
+              // Cập nhật tại Update Event - thời điểm an toàn nhất
+              htim1.Instance->PSC = tim1_shadow.psc;
+              htim1.Instance->ARR = tim1_shadow.arr;
+              __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, tim1_shadow.ccr);
+              // Nếu motor 2 dùng TIM1 channel 3
+              // __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, tim1_shadow.ccr);
+              tim1_shadow.update_pending = 0;
+              // ✅ FIX UART TIMEOUT: Disable Update interrupt sau khi xử lý xong
+              // Chỉ enable lại khi có update_pending mới
+              __HAL_TIM_DISABLE_IT(&htim1, TIM_IT_UPDATE);
+              // Clear flag ngay để tránh xử lý lại
+              __HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
+              /* USER CODE END TIM1_UP_IRQn 0 */
+              return;  // Return sớm để không gọi HAL_TIM_IRQHandler không cần thiết
+          }
+      }
+  }
   /* USER CODE END TIM1_UP_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
@@ -261,7 +296,28 @@ void TIM2_IRQHandler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-
+  // ✅ FIX JITTER: Cập nhật ARR/CCR tại Update Event để tránh jitter
+  // ✅ FIX UART TIMEOUT: Tối ưu logic để chạy nhanh, chỉ xử lý khi cần
+  // ✅ Motor1 dùng TIM3 channel 1
+  if (__HAL_TIM_GET_FLAG(&htim3, TIM_FLAG_UPDATE) != RESET) {
+      if (__HAL_TIM_GET_IT_SOURCE(&htim3, TIM_IT_UPDATE) != RESET) {
+          // Chỉ xử lý nếu có update_pending để giảm overhead
+          if (tim3_shadow.update_pending) {
+              // Cập nhật tại Update Event - thời điểm an toàn nhất
+              htim3.Instance->PSC = tim3_shadow.psc;
+              htim3.Instance->ARR = tim3_shadow.arr;
+              __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, tim3_shadow.ccr);
+              tim3_shadow.update_pending = 0;
+              // ✅ FIX UART TIMEOUT: Disable Update interrupt sau khi xử lý xong
+              // Chỉ enable lại khi có update_pending mới
+              __HAL_TIM_DISABLE_IT(&htim3, TIM_IT_UPDATE);
+              // Clear flag ngay để tránh xử lý lại
+              __HAL_TIM_CLEAR_IT(&htim3, TIM_IT_UPDATE);
+              /* USER CODE END TIM3_IRQn 0 */
+              return;  // Return sớm để không gọi HAL_TIM_IRQHandler không cần thiết
+          }
+      }
+  }
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */

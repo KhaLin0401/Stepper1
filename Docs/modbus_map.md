@@ -74,12 +74,21 @@
 
 ## 🟢 Digital Output Registers (Base Address: 0x0030)
 
-| Address | Name            | Type   | R/W | Description                                                                                | Default | Range    |
-|---------|----------------|--------|-----|--------------------------------------------------------------------------------------------|---------|----------|
-| 0x0030  | DO_Status_Word | uint16 | R   | Bitfield for 2 digital outputs (bit 0: DO1, bit 1: DO2; 1=active)                         | 0x0000  | 0–0x0003 |
-| 0x0031  | DO1_Control    | uint8  | R/W | Control DO1 (0=off, 1=on)                                                                  | 0       | 0–1      |
-| 0x0032  | DO1_Assignment | uint8  | R/W | Function assignment for DO1 (0=none, 1=running M1, 2=fault M1, 3=speed reached M1, 4=ready)| 0       | 0–10     |
-| 0x0033  | DO2_Control    | uint8  | R/W | Control DO2 (0=off, 1=on)                                                                  | 0       | 0–1      |
-| 0x0034  | DO2_Assignment | uint8  | R/W | Function assignment for DO2 (same options as DO1)                                          | 0       | 0–10     |
+| Address | Name                  | Type   | R/W | Description                                                                                | Default | Range    |
+|---------|-----------------------|--------|-----|--------------------------------------------------------------------------------------------|---------|----------|
+| 0x0030  | DO_Status_Word        | uint16 | R   | Bitfield for 2 digital outputs (bit 0: DO1, bit 1: DO2; 1=active)                         | 0x0000  | 0–0x0003 |
+| 0x0031  | DO1_Control           | uint8  | R/W | Control DO1 (0=off, 1=on)                                                                  | 0       | 0–1      |
+| 0x0032  | DO1_Assignment        | uint8  | R/W | Function assignment for DO1 (0=none, 1=running M1, 2=fault M1, 3=speed reached M1, 4=ready)| 0       | 0–10     |
+| 0x0033  | DO2_Control           | uint8  | R/W | Control DO2 (0=off, 1=on)                                                                  | 0       | 0–1      |
+| 0x0034  | DO2_Assignment        | uint8  | R/W | Function assignment for DO2 (same options as DO1)                                          | 0       | 0–10     |
+
+## 🟢 Encoder Registers (Base Address: 0x0035)
+| Address | Name                  | Type   | R/W | Description                                                                                | Default | Range    |
+|---------|-----------------------|--------|-----|--------------------------------------------------------------------------------------------|---------|----------|
+| 0x0035  | Feedback_Velocity     | uint8  | R   | Feedback velocity from encoder/sensor                                                      | 0       |          |
+| 0x0036  | Feedback_Pulse_Count  | uint16 | R   | Pulse count from encoder/sensor                                                            | 0       |          |
+| 0x0037  | Diameter              | uint8  | R/W | Wheel/roller diameter (for distance calculation)                                           | 0       |          |
+| 0x0038  | Revolutions           | uint16 | R   | Total revolutions count                                                                    | 0       |          |
+| 0x0039  | Reset_Flag            | uint8  | R/W | Reset flag (write 1 to reset counters)                                                     | 0       | 0–1      |
 
 ---
